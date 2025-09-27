@@ -12,6 +12,16 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" Version="9.5.0" />
+    <PackageReference Include="Aspire.Hosting.Azure.CosmosDB" Version="9.5.0" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Api\MovieDatabase.Api\MovieDatabase.Api.csproj" />
+  </ItemGroup>
+    
+    
+    <PropertyGroup>
+        <NoWarn>$(NoWarn);ASPIRECOSMOSDB001</NoWarn>
+    </PropertyGroup>
 
 </Project>
