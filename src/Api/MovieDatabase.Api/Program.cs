@@ -1,5 +1,7 @@
 using MovieDatabase.Api;
+using MovieDatabase.Api.Application;
 using MovieDatabase.Api.Infrastructure;
+using MovieDatabase.Api.Mutations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,8 +9,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.AddAzureCosmosClient(connectionName: "movies-db-cosmos");
-builder.Services.AddCosmosDefaults();
+builder.Services.AddApplicationDefaults();
+builder.Services.AddInfrastructureDefaults();
 builder.Services.AddGraphQLServer()
+    .AddMutationType<FilmMutations>()
     .AddQueryType<Query>();
 
 var app = builder.Build();
