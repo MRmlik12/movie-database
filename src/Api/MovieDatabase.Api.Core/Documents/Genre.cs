@@ -1,4 +1,5 @@
 using MovieDatabase.Api.Core.Dtos;
+using MovieDatabase.Api.Core.Interfaces;
 
 namespace MovieDatabase.Api.Core.Documents;
 
@@ -6,12 +7,17 @@ public class Genre : BaseDocument, IFrom<Genre, GenreDto>
 {
     public string Name { get; set; }
 
-    public Genre(string id, string name)
+    public Genre(string name)
+    {
+        Name = name;
+    }
+    
+    private Genre(string id, string name)
     {
         Id = Guid.Parse(id);
         Name = name;
     }
 
     public static Genre From(GenreDto document)
-        => new Genre(document.Id, document.Name);
+        => new (document.Id, document.Name);
 }

@@ -3,7 +3,7 @@ using MovieDatabase.Api.Infrastructure.Db.Repositories;
 
 namespace MovieDatabase.Api.Application.Actors.VerifyActorCreated;
 
-public class VerifyActorCreatedRequestHandler(IActorRepository actorRepository) : IRequestHandler<VerifyActorCreatedRequest, bool>
+internal class VerifyActorCreatedRequestHandler(IActorRepository actorRepository) : IRequestHandler<VerifyActorCreatedRequest, bool>
 {
     public async Task<bool> Handle(VerifyActorCreatedRequest request)
     {
@@ -13,7 +13,11 @@ public class VerifyActorCreatedRequestHandler(IActorRepository actorRepository) 
             return true;
         }
         
-        var existsByName = await actorRepository.GetByNameSurname(request.Name, request.Surname) != null;
+        var existsByNameSurname = await actorRepository.GetByNameSurname(request.Name, request.Surname) != null;
+        if (existsByNameSurname)
+        {
+            return true;
+        }
         
         return false;
     }

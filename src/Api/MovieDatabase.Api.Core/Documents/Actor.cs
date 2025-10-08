@@ -1,4 +1,5 @@
 using MovieDatabase.Api.Core.Dtos;
+using MovieDatabase.Api.Core.Interfaces;
 
 namespace MovieDatabase.Api.Core.Documents;
 

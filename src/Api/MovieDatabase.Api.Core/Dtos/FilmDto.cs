@@ -1,8 +1,9 @@
 ﻿using MovieDatabase.Api.Core.Documents;
+using MovieDatabase.Api.Core.Interfaces;
 
 namespace MovieDatabase.Api.Core.Dtos;
 
-public record FilmDto(string Id, string Title, DateOnly ReleaseDate, ActorDto[] Actor, GenreDto Genre)
+public record FilmDto(string Id, string Title, DateOnly ReleaseDate, ActorDto[] Actors, GenreDto[] Genres)
     : IFrom<FilmDto, Film>
 {
     public static FilmDto From(Film document)
@@ -11,6 +12,6 @@ public record FilmDto(string Id, string Title, DateOnly ReleaseDate, ActorDto[] 
             document.Title,
             document.ReleaseDate,
             document.Actors.Select(ActorDto.From).ToArray(),
-            GenreDto.From(document.Genre)
+            document.Genres.Select(GenreDto.From).ToArray()
         );
 }

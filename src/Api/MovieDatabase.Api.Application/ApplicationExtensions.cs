@@ -1,7 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
 
+using MovieDatabase.Api.Application.Actors.VerifyActorCreated;
 using MovieDatabase.Api.Application.Films.CreateFilm;
 using MovieDatabase.Api.Application.Films.GetFilms;
+using MovieDatabase.Api.Application.Genres.VerifyGenreCreated;
 using MovieDatabase.Api.Core.Cqrs;
 using MovieDatabase.Api.Core.Dtos;
 
@@ -25,6 +27,8 @@ public static class ApplicationExtensions
     {
         services.AddScoped<IRequestHandler<CreateFilmRequest, FilmDto>, CreateFilmRequestHandler>();
         services.AddScoped<IRequestHandler<GetFilmsRequest, IEnumerable<FilmDto>>, GetFilmsRequestHandler>();
+        services.AddScoped<IRequestHandler<VerifyActorCreatedRequest, bool>, VerifyActorCreatedRequestHandler>();
+        services.AddScoped<IRequestHandler<VerifyGenreCreatedRequest, bool>, VerifyGenreCreatedRequestHandler>();
         
         return services;
     }

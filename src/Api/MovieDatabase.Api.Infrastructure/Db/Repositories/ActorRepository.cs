@@ -25,7 +25,6 @@ public class ActorRepository(CosmosWrapper wrapper) : IActorRepository
 
         var actor = await iterator.ReadNextAsync();
 
-        // TODO: Finish implementation
-        return actor.Resource.;
+        return actor.Resource.SingleOrDefault();
     }
 }
