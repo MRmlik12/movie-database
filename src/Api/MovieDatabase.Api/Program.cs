@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-builder.AddAzureCosmosClient(connectionName: "movies-db-cosmos");
+builder.AddAzureCosmosClient(connectionName: "movies-database-cosmos");
 builder.Services.AddApplicationDefaults();
 builder.Services.AddInfrastructureDefaults();
 builder.Services.AddGraphQLServer()

@@ -5,7 +5,7 @@ namespace MovieDatabase.Api.Application.Actors.VerifyActorCreated;
 
 internal class VerifyActorCreatedRequestHandler(IActorRepository actorRepository) : IRequestHandler<VerifyActorCreatedRequest, bool>
 {
-    public async Task<bool> Handle(VerifyActorCreatedRequest request)
+    public async Task<bool> HandleAsync(VerifyActorCreatedRequest request)
     {
         var existsById = await actorRepository.GetByIdAsync(request.Id) != null;
         if (existsById)

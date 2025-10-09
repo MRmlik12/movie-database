@@ -1,20 +1,19 @@
-using MovieDatabase.Api.Core.Dtos;
-using MovieDatabase.Api.Core.Interfaces;
-
 namespace MovieDatabase.Api.Core.Documents;
 
-public class Actor : BaseDocument, IFrom<Actor, ActorDto>
+public class Actor : BaseDocument
 {
     public string Name { get; set; }
     public string Surname { get; set; }
+    public List<string> FilmIds { get; set; } = new();
 
-    public Actor(string id, string name, string surname)
+    public Actor(string? id, string name, string surname)
     {
-        Id = Guid.Parse(id);
+        if (id is not null)
+        {
+            Id = Guid.Parse(id);
+        }
+        
         Name = name;
         Surname = surname;
     }
-
-    public static Actor From(ActorDto document)
-        => new (document.Id, document.Name, document.Surname);
 }

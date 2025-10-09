@@ -6,7 +6,7 @@ namespace MovieDatabase.Api.Application.Films.GetFilms;
 
 public class GetFilmsRequestHandler(IFilmRepository repository) : IRequestHandler<GetFilmsRequest, IEnumerable<FilmDto>>
 {
-    public async Task<IEnumerable<FilmDto>> Handle(GetFilmsRequest request)
+    public async Task<IEnumerable<FilmDto>> HandleAsync(GetFilmsRequest request)
     {
         var films = await repository.GetAll(request.Title);
         

@@ -1,23 +1,16 @@
-using MovieDatabase.Api.Core.Dtos;
-using MovieDatabase.Api.Core.Interfaces;
-
 namespace MovieDatabase.Api.Core.Documents;
 
-public class Genre : BaseDocument, IFrom<Genre, GenreDto>
+public class Genre : BaseDocument
 {
     public string Name { get; set; }
 
-    public Genre(string name)
+    public Genre(string? id, string name)
     {
+        if (id is not null)
+        {
+            Id = Guid.Parse(id);
+        }
+        
         Name = name;
     }
-    
-    private Genre(string id, string name)
-    {
-        Id = Guid.Parse(id);
-        Name = name;
-    }
-
-    public static Genre From(GenreDto document)
-        => new (document.Id, document.Name);
 }

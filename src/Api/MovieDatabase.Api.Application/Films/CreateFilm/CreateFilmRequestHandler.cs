@@ -5,9 +5,9 @@ using MovieDatabase.Api.Infrastructure.Db.Repositories;
 
 namespace MovieDatabase.Api.Application.Films.CreateFilm;
 
-internal class CreateFilmRequestHandler(IFilmRepository filmRepository, IDispatcher dispatcher) : IRequestHandler<CreateFilmRequest, FilmDto>
+public class CreateFilmRequestHandler(IFilmRepository filmRepository) : IRequestHandler<CreateFilmRequest, FilmDto>
 {
-    public async Task<FilmDto> Handle(CreateFilmRequest request)
+    public async Task<FilmDto> HandleAsync(CreateFilmRequest request)
     {
         // var filmExists = await filmRepository.GetByName(request.Title) != null;
         // if (filmExists)
@@ -22,10 +22,10 @@ internal class CreateFilmRequestHandler(IFilmRepository filmRepository, IDispatc
             Title = request.Title,
             ReleaseDate = request.ReleaseDate,
             Description = request.Description,
-            Actors = request.Actors.Select(Actor.From).ToList(),
-            Genres = request.Genres.Select(Genre.From).ToList(),
-            Director = Director.From(request.Director),
-            Producer = Producer.From(request.Producer)
+            Actors = request.Actors.Select(a => new Actor(a.Id, a.Name, a.Surname)).ToList(),
+            Genres = request.Genres.Select(g => new Genre(g.Id, g.Name)).ToList(),
+            Director = new Director(request.Director.Id, request.Director.Name, request.Director.Surname),
+            Producer = new Producer(request.Producer.Id, request.Producer.Name)
         };
 
         await filmRepository.Add(film);

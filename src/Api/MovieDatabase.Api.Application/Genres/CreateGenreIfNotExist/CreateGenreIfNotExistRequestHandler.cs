@@ -7,7 +7,7 @@ namespace MovieDatabase.Api.Application.Genres.CreateGenreIfNotExist;
 internal class CreateGenreIfNotExistRequestHandler(IGenreRepository genreRepository)
     : IRequestHandler<CreateGenreIfNotExistRequest, Genre>
 {
-    public async Task<Genre> Handle(CreateGenreIfNotExistRequest request)
+    public async Task<Genre> HandleAsync(CreateGenreIfNotExistRequest request)
     {
         var genre = await genreRepository.GetById(request.Id);
         if (genre is not null)
@@ -21,7 +21,7 @@ internal class CreateGenreIfNotExistRequestHandler(IGenreRepository genreReposit
             return genre;
         }
 
-        genre = new Genre(request.Name);
+        // genre = new Genre(request.Name);
 
         return genre;
     }

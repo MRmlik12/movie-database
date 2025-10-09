@@ -5,7 +5,7 @@ namespace MovieDatabase.Api.Application.Genres.VerifyGenreCreated;
 
 public class VerifyGenreCreatedRequestHandler(IGenreRepository genreRepository) : IRequestHandler<VerifyGenreCreatedRequest, bool>
 {
-    public async Task<bool> Handle(VerifyGenreCreatedRequest request)
+    public async Task<bool> HandleAsync(VerifyGenreCreatedRequest request)
     {
         var existsById = await genreRepository.GetById(request.Id) != null;
         if (existsById)
