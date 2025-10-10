@@ -3,8 +3,8 @@ using MovieDatabase.Api.Core.Interfaces;
 
 namespace MovieDatabase.Api.Core.Dtos;
 
-public record DirectorDto(string Id, string Name, string Surname) : IFrom<DirectorDto, Director>
+public record DirectorDto(string Id, string Name, string Surname) : IFrom<DirectorDto, DirectorInfo>
 {
-    public static DirectorDto From(Director document)
+    public static DirectorDto From(DirectorInfo document)
         => new (document.Id.ToString(), document.Name, document.Surname);
 }

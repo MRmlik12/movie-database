@@ -1,6 +1,7 @@
 using MovieDatabase.Api;
 using MovieDatabase.Api.Application;
 using MovieDatabase.Api.Infrastructure;
+using MovieDatabase.Api.Infrastructure.Db;
 using MovieDatabase.Api.Mutations;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +19,8 @@ builder.Services.AddGraphQLServer()
 var app = builder.Build();
 
 app.MapGraphQL();
+
+await CosmosInitializer.Initialize(app);
 
 app.UseHttpsRedirection();
 

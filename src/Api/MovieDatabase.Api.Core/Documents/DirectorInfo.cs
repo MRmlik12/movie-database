@@ -1,8 +1,8 @@
 ﻿namespace MovieDatabase.Api.Core.Documents;
 
-public class Director : BaseDocument
+public class DirectorInfo : BaseDocument
 {
-    public Director(string? id, string name, string surname)
+    public DirectorInfo(string? id, string name, string surname)
     {
         if (id is not null)
         {
