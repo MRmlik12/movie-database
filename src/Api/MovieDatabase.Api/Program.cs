@@ -1,3 +1,5 @@
+using Microsoft.Azure.Cosmos;
+
 using MovieDatabase.Api;
 using MovieDatabase.Api.Application;
 using MovieDatabase.Api.Infrastructure;
@@ -9,7 +11,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-builder.AddAzureCosmosClient(connectionName: "movies-database-cosmos");
+builder.AddAzureCosmosClient(connectionName: "movies-database-cosmos", configureClientOptions: opt =>
+{
+    opt.SerializerOptions = new CosmosSerializationOptions
+    {
+        PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase
+    };
+});
 builder.Services.AddApplicationDefaults();
 builder.Services.AddInfrastructureDefaults();
 builder.Services.AddGraphQLServer()
