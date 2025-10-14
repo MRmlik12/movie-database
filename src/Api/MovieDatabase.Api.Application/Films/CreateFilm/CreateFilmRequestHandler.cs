@@ -1,6 +1,5 @@
 ﻿using MovieDatabase.Api.Application.Films.Exceptions;
 using MovieDatabase.Api.Core.Cqrs;
-using MovieDatabase.Api.Core.Documents;
 using MovieDatabase.Api.Core.Documents.Films;
 using MovieDatabase.Api.Core.Dtos;
 using MovieDatabase.Api.Infrastructure.Db.Repositories;
@@ -11,17 +10,18 @@ public class CreateFilmRequestHandler(IFilmRepository filmRepository) : IRequest
 {
     public async Task<FilmDto> HandleAsync(CreateFilmRequest request)
     {
-        var existingFilm = await filmRepository.GetByName(request.Title);
+        var filmTitle = request.Title.TrimStart().TrimEnd();
+        var existingFilm = await filmRepository.GetByName(filmTitle);
         if (existingFilm is not null)
         {
-            throw new FilmExistApplicationException();
+            throw new FilmExistsApplicationException();
         }
         
         var film = new Film
         {
-            Title = request.Title,
+            Title = filmTitle,
             ReleaseDate = request.ReleaseDate,
-            Description = request.Description,
+            Description = request.Description?.TrimStart().TrimEnd() ?? string.Empty,
             Actors = request.Actors.Select(a => new Actor(a.Id, a.Name, a.Surname)).ToList(),
             Genres = request.Genres.Select(g => new Genre(g.Id, g.Name)).ToList(),
             Director = new DirectorInfo(request.Director.Id, request.Director.Name, request.Director.Surname),

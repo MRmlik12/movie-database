@@ -1,6 +1,5 @@
 ﻿using Microsoft.Azure.Cosmos;
 
-using MovieDatabase.Api.Core.Documents;
 using MovieDatabase.Api.Core.Documents.Films;
 
 namespace MovieDatabase.Api.Infrastructure.Db;
@@ -17,8 +16,6 @@ public static class CosmosSeeder
             {
                 Title = "Inception",
                 ReleaseDate = new DateOnly(2010, 7, 16),
-                DirectorId = Guid.NewGuid().ToString(),
-                ProducerId = Guid.NewGuid().ToString(),
                 Director = new DirectorInfo(null, "Christopher", "Nolan"),
                 Producer = new ProducerInfo(null, "Emma Thomas"),
                 Actors =
@@ -38,8 +35,6 @@ public static class CosmosSeeder
             {
                 Title = "The Matrix",
                 ReleaseDate = new DateOnly(1999, 3, 31),
-                DirectorId = Guid.NewGuid().ToString(),
-                ProducerId = Guid.NewGuid().ToString(),
                 Director = new DirectorInfo(null, "Lana", "Wachowski"),
                 Producer = new ProducerInfo(null, "Joel Silver"),
                 Actors =
