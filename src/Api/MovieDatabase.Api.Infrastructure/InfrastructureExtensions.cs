@@ -21,8 +21,6 @@ public static class InfrastructureExtensions
     private static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         services.AddTransient<IFilmRepository, FilmRepository>();
-        services.AddTransient<IActorRepository, ActorRepository>();
-        services.AddTransient<IGenreRepository, GenreRepository>();
 
         return services;
     }

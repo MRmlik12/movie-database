@@ -1,4 +1,4 @@
-namespace MovieDatabase.Api.Core.Documents;
+﻿namespace MovieDatabase.Api.Core.Documents.Films;
 
 public class Actor : BaseDocument
 {

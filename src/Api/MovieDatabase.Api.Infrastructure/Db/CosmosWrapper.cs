@@ -1,6 +1,7 @@
 using Microsoft.Azure.Cosmos;
 
 using MovieDatabase.Api.Core.Documents;
+using MovieDatabase.Api.Core.Documents.Films;
 
 namespace MovieDatabase.Api.Infrastructure.Db;
 

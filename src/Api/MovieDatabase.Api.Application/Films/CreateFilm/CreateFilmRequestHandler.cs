@@ -1,5 +1,7 @@
-﻿using MovieDatabase.Api.Core.Cqrs;
+﻿using MovieDatabase.Api.Application.Films.Exceptions;
+using MovieDatabase.Api.Core.Cqrs;
 using MovieDatabase.Api.Core.Documents;
+using MovieDatabase.Api.Core.Documents.Films;
 using MovieDatabase.Api.Core.Dtos;
 using MovieDatabase.Api.Infrastructure.Db.Repositories;
 
@@ -9,6 +11,12 @@ public class CreateFilmRequestHandler(IFilmRepository filmRepository) : IRequest
 {
     public async Task<FilmDto> HandleAsync(CreateFilmRequest request)
     {
+        var existingFilm = await filmRepository.GetByName(request.Title);
+        if (existingFilm is not null)
+        {
+            throw new FilmExistApplicationException();
+        }
+        
         var film = new Film
         {
             Title = request.Title,

@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace MovieDatabase.Api.Core.Documents;
+namespace MovieDatabase.Api.Core.Documents.Films;
 
 public class Film : BaseDocument
 {
