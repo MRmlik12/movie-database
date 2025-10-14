@@ -1,7 +1,12 @@
+using System.Text.Json.Serialization;
+
 namespace MovieDatabase.Api.Core.Documents;
 
 public class Film : BaseDocument
 {
+    [JsonIgnore]
+    public const string PartitionKey = "/title";
+    
     public string Title { get; set; } = null!;
     public DateOnly ReleaseDate { get; set; }
     public string DirectorId { get; set; } = null!;

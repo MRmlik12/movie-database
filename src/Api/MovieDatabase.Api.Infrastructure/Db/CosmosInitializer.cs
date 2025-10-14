@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
+using MovieDatabase.Api.Core.Documents;
+
 namespace MovieDatabase.Api.Infrastructure.Db;
 
 public static class CosmosInitializer
@@ -11,5 +13,14 @@ public static class CosmosInitializer
         var wrapper = serviceScope.ServiceProvider.GetRequiredService<CosmosWrapper>();
 
         await wrapper.InitializeContainers();
+
+        var filmContainer = wrapper.Movies.GetContainer(nameof(Film));
+        var iter = filmContainer.GetItemQueryIterator<Film>("SELECT TOP 1 * FROM c");
+        var films = await iter.ReadNextAsync();
+
+        if (films.Count == 0)
+        {
+            await CosmosSeeder.SeedFilms(wrapper.Movies);
+        }
     }
 }

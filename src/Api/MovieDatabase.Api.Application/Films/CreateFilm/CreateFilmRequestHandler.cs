@@ -9,14 +9,6 @@ public class CreateFilmRequestHandler(IFilmRepository filmRepository) : IRequest
 {
     public async Task<FilmDto> HandleAsync(CreateFilmRequest request)
     {
-        // var filmExists = await filmRepository.GetByName(request.Title) != null;
-        // if (filmExists)
-        // {
-        //     throw new FilmExistApplicationException();
-        // }
-        //
-        // var genreExists = await dispatcher.Dispatch(new VerifyGenreCreatedRequest(request.Genre.Id, request.Genre.Name));
-        
         var film = new Film
         {
             Title = request.Title,

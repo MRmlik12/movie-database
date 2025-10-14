@@ -27,11 +27,16 @@ public class FilmRepository(CosmosWrapper wrapper) : IFilmRepository
         return response?.Resource;
     }
 
-    public async Task<IEnumerable<Film>> GetAll(string title = "")
+    public async Task<IEnumerable<Film>> GetAll(string? title)
     {
-        using var iterator = Container.GetItemLinqQueryable<Film>(true)
-            .Where(f => f.Title.StartsWith(title))
-            .ToFeedIterator();
+        var query = Container.GetItemLinqQueryable<Film>(true);
+
+        if (!string.IsNullOrEmpty(title))
+        {
+            query = (IOrderedQueryable<Film>)query.Where(f => f.Title.StartsWith(title));
+        }
+
+        using var iterator = query.ToFeedIterator();
 
         var results = new List<Film>();
         while (iterator.HasMoreResults)

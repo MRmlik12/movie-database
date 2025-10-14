@@ -6,7 +6,7 @@ namespace MovieDatabase.Api;
 
 public class Query
 {
-    public async Task<IEnumerable<FilmDto>> GetFilms([Service] IDispatcher dispatcher, string? title)
+    public async Task<IEnumerable<FilmDto>> GetFilms([Service] IDispatcher dispatcher, string? title = null)
     {
         var request = new GetFilmsRequest(title);
 

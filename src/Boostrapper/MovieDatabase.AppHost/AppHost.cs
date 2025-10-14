@@ -9,12 +9,15 @@ var cosmos = builder.AddAzureCosmosDB(cosmosResourceName);
 
 if (isDevelopment)
 {
-    cosmos.RunAsPreviewEmulator();
+    cosmos.RunAsEmulator(cfg =>
+    {
+    });
 }
 
 cosmos.AddCosmosDatabase("movies-db", "Movies");
 
 var apiService = builder.AddProject<Projects.MovieDatabase_Api>("movies-db-api")
-    .WithReference(cosmos);
+    .WithReference(cosmos)
+    .WaitFor(cosmos);
 
 builder.Build().Run();
