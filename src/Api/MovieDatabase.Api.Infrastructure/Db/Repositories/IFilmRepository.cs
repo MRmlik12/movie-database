@@ -9,5 +9,6 @@ public interface IFilmRepository
     Task<Film?> GetByName(string name);
     Task<Film?> GetById(string id);
     Task<IEnumerable<Actor>> GetActors(string? searchTerm);
+    Task<IEnumerable<Genre>> GetGenres(string? searchTerm);
     Task<IEnumerable<Film>> GetAll(string? title);
 }
