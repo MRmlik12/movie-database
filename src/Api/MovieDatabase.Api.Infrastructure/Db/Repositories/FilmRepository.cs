@@ -34,8 +34,17 @@ public class FilmRepository(CosmosWrapper wrapper) : IFilmRepository
         
         if (!string.IsNullOrEmpty(searchTerm))
         {
-            var terms = searchTerm.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-            query = query.Where(a => a.ToString().Contains(searchTerm));
+            var split = searchTerm.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (split.Length == 2)
+            {
+                query = query.Where(a => (a.Name.Contains(split[0]) && a.Surname.Contains(split[1])) ||
+                                         (a.Name.Contains(split[1]) && a.Surname.Contains(split[0])));
+            }
+            else
+            {
+                query = query.Where(a => a.Name.Contains(searchTerm) ||
+                                         a.Surname.Contains(searchTerm));
+            }
         }
 
         using var iterator = query.ToFeedIterator(); 
