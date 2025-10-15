@@ -1,6 +1,5 @@
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Linq;
-using MovieDatabase.Api.Core.Documents;
 using MovieDatabase.Api.Core.Documents.Films;
 
 namespace MovieDatabase.Api.Infrastructure.Db.Repositories;
@@ -28,9 +27,42 @@ public class FilmRepository(CosmosWrapper wrapper) : IFilmRepository
         return response?.Resource;
     }
 
+    public async Task<IEnumerable<Actor>> GetActors(string? searchTerm)
+    {
+        var query = Container.GetItemLinqQueryable<Film>()
+            .SelectMany(f => f.Actors);
+        
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            var split = searchTerm.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (split.Length == 2)
+            {
+                query = query.Where(a => (a.Name.Contains(split[0]) && a.Surname.Contains(split[1])) ||
+                                         (a.Name.Contains(split[1]) && a.Surname.Contains(split[0])));
+            }
+            else
+            {
+                query = query.Where(a => a.Name.Contains(searchTerm) ||
+                                         a.Surname.Contains(searchTerm));
+            }
+        }
+
+        using var iterator = query.ToFeedIterator(); 
+
+        var results = new List<Actor>();
+        while (iterator.HasMoreResults)
+        {
+            var response = await iterator.ReadNextAsync();
+
+            results.AddRange(response.Resource);
+        }
+
+        return results;
+    }
+
     public async Task<IEnumerable<Film>> GetAll(string? title)
     {
-        var query = Container.GetItemLinqQueryable<Film>(true);
+        var query = Container.GetItemLinqQueryable<Film>();
 
         if (!string.IsNullOrEmpty(title))
         {
