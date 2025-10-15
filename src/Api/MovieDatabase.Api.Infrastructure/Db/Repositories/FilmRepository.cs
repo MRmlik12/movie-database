@@ -60,6 +60,29 @@ public class FilmRepository(CosmosWrapper wrapper) : IFilmRepository
         return results;
     }
 
+    public async Task<IEnumerable<Genre>> GetGenres(string? searchTerm)
+    {
+        var query = Container.GetItemLinqQueryable<Film>()
+            .SelectMany(f => f.Genres);
+        
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            query = query.Where(g => g.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+        }
+
+        using var iterator = query.ToFeedIterator(); 
+
+        var results = new List<Genre>();
+        while (iterator.HasMoreResults)
+        {
+            var response = await iterator.ReadNextAsync();
+
+            results.AddRange(response.Resource);
+        }
+
+        return results; 
+    }
+
     public async Task<IEnumerable<Film>> GetAll(string? title)
     {
         var query = Container.GetItemLinqQueryable<Film>();
