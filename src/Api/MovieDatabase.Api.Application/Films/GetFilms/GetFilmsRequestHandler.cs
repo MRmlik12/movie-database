@@ -9,7 +9,7 @@ public class GetFilmsRequestHandler(IFilmRepository repository) : IRequestHandle
     public async Task<IEnumerable<FilmDto>> HandleAsync(GetFilmsRequest request)
     {
         var films = await repository.GetAll(request.Title);
-        
+
         return films.Select(FilmDto.From);
     }
 }

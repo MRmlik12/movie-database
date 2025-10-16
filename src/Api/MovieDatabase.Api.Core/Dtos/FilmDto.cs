@@ -16,7 +16,7 @@ public record FilmDto(
 ) : IFrom<FilmDto, Film>
 {
     public static FilmDto From(Film document)
-        => new (
+        => new(
             document.Id.ToString(),
             document.Title,
             document.Description,

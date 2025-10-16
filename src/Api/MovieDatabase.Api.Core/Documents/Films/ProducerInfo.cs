@@ -10,7 +10,7 @@ public class ProducerInfo : BaseDocument
         {
             Id = Guid.Parse(id);
         }
-        
+
         Name = name;
     }
 }
