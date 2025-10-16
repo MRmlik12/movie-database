@@ -8,7 +8,7 @@ public class DirectorInfo : BaseDocument
         {
             Id = Guid.Parse(id);
         }
-        
+
         Name = name;
         Surname = surname;
     }

@@ -11,7 +11,7 @@ public class Actor : BaseDocument
         {
             Id = Guid.Parse(id);
         }
-        
+
         Name = name;
         Surname = surname;
     }

@@ -10,7 +10,7 @@ public static class InfrastructureExtensions
     public static void AddInfrastructureDefaults(this IServiceCollection services)
         => services.AddCosmosDefaults()
             .AddRepositories();
-    
+
     private static IServiceCollection AddCosmosDefaults(this IServiceCollection services)
     {
         services.AddTransient<CosmosWrapper>();

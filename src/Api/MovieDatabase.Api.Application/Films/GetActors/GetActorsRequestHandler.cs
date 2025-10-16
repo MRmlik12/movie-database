@@ -9,7 +9,7 @@ public class GetActorsRequestHandler(IFilmRepository filmRepository) : IRequestH
     public async Task<IEnumerable<ActorDto>> HandleAsync(GetActorsRequest request)
     {
         var actors = await filmRepository.GetActors(request.SearchTerm);
-        
+
         return actors.Select(ActorDto.From).ToArray();
     }
 }

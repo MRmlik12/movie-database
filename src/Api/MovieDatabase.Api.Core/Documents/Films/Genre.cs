@@ -10,7 +10,7 @@ public class Genre : BaseDocument
         {
             Id = Guid.Parse(id);
         }
-        
+
         Name = name;
     }
 }

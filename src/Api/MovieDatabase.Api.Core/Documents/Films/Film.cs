@@ -6,7 +6,7 @@ public class Film : BaseDocument
 {
     [JsonIgnore]
     public const string PartitionKey = "/title";
-    
+
     public string Title { get; set; } = null!;
     public DateOnly ReleaseDate { get; set; }
     public DirectorInfo Director { get; set; }

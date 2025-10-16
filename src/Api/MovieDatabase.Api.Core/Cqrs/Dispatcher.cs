@@ -13,7 +13,7 @@ public class Dispatcher(IServiceProvider provider) : IDispatcher
         {
             throw new RequestHandlerNotFoundException();
         }
-        
+
         return await handler.HandleAsync((dynamic)request);
     }
 }

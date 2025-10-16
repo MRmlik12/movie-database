@@ -9,7 +9,7 @@ public static class CosmosSeeder
     public static async Task SeedFilms(Database db)
     {
         var filmContainer = db.GetContainer(nameof(Film));
-        
+
         var movies = new List<Film>
         {
             new()
@@ -51,7 +51,7 @@ public static class CosmosSeeder
                 Description = "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers."
             }
         };
-    
+
         foreach (var movie in movies)
         {
             await filmContainer.CreateItemAsync(movie);

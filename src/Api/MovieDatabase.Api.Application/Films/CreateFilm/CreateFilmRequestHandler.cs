@@ -16,7 +16,7 @@ public class CreateFilmRequestHandler(IFilmRepository filmRepository) : IRequest
         {
             throw new FilmExistsApplicationException();
         }
-        
+
         var film = new Film
         {
             Title = filmTitle,
