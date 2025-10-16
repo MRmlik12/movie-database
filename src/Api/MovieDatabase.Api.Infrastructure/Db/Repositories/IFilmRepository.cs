@@ -11,5 +11,6 @@ public interface IFilmRepository
     Task<IEnumerable<Actor>> GetActors(string? searchTerm);
     Task<IEnumerable<Genre>> GetGenres(string? searchTerm);
     Task<IEnumerable<DirectorInfo>> GetDirectors(string? searchTerm);
+    Task<IEnumerable<ProducerInfo>> GetProducers(string? searchTerm);
     Task<IEnumerable<Film>> GetAll(string? title);
 }

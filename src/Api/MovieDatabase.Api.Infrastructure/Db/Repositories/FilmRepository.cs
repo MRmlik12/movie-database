@@ -117,6 +117,29 @@ public class FilmRepository(CosmosWrapper wrapper) : IFilmRepository
         return results;
     }
 
+    public async Task<IEnumerable<ProducerInfo>> GetProducers(string? searchTerm)
+    {
+        var query = Container.GetItemLinqQueryable<Film>()
+            .Select(f => f.Producer);
+
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            query = query.Where(g => g.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+        }
+
+        using var iterator = query.ToFeedIterator();
+
+        var results = new List<ProducerInfo>();
+        while (iterator.HasMoreResults)
+        {
+            var response = await iterator.ReadNextAsync();
+
+            results.AddRange(response.Resource);
+        }
+
+        return results;
+    }
+
     public async Task<IEnumerable<Film>> GetAll(string? title)
     {
         var query = Container.GetItemLinqQueryable<Film>();
