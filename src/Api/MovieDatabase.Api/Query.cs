@@ -2,6 +2,7 @@ using MovieDatabase.Api.Application.Films.GetActors;
 using MovieDatabase.Api.Application.Films.GetDirectors;
 using MovieDatabase.Api.Application.Films.GetFilms;
 using MovieDatabase.Api.Application.Films.GetGenres;
+using MovieDatabase.Api.Application.Films.GetProducers;
 using MovieDatabase.Api.Core.Cqrs;
 using MovieDatabase.Api.Core.Dtos;
 
@@ -39,6 +40,15 @@ public class Query
     public async Task<IEnumerable<DirectorDto>> GetDirectors([Service] IDispatcher dispatcher, string? term)
     {
         var request = new GetDirectorsRequest(term);
+
+        var result = await dispatcher.Dispatch(request);
+
+        return result;
+    }
+
+    public async Task<IEnumerable<ProducerDto>> GetProducers([Service] IDispatcher dispatcher, string? term)
+    {
+        var request = new GetProducersRequest(term);
 
         var result = await dispatcher.Dispatch(request);
 
