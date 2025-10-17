@@ -25,7 +25,8 @@ public class CreateFilmRequestHandler(IFilmRepository filmRepository) : IRequest
             Actors = request.Actors.Select(a => new Actor(a.Id, a.Name, a.Surname)).ToList(),
             Genres = request.Genres.Select(g => new Genre(g.Id, g.Name)).ToList(),
             Director = new DirectorInfo(request.Director.Id, request.Director.Name, request.Director.Surname),
-            Producer = new ProducerInfo(request.Producer.Id, request.Producer.Name)
+            Producer = new ProducerInfo(request.Producer.Id, request.Producer.Name),
+            CreatorId = string.Empty
         };
 
         await filmRepository.Add(film);

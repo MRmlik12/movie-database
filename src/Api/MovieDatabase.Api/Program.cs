@@ -2,6 +2,7 @@ using Microsoft.Azure.Cosmos;
 
 using MovieDatabase.Api;
 using MovieDatabase.Api.Application;
+using MovieDatabase.Api.Core;
 using MovieDatabase.Api.Infrastructure;
 using MovieDatabase.Api.Infrastructure.Db;
 using MovieDatabase.Api.Mutations;
@@ -18,17 +19,28 @@ builder.AddAzureCosmosClient(connectionName: "movies-database-cosmos", configure
         PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase
     };
 });
+
 builder.Services.AddApplicationDefaults();
-builder.Services.AddInfrastructureDefaults();
+builder.Services.AddInfrastructureDefaults(builder.Configuration);
+builder.Services.AddCoreDefaults(builder.Configuration);
 builder.Services.AddGraphQLServer()
-    .AddMutationType<FilmMutations>()
-    .AddQueryType<Query>();
+    .AddMutationType(d => d.Name("Mutation"))
+    .AddTypeExtension<FilmMutations>()
+    .AddTypeExtension<UserMutations>()
+    .AddQueryType<Query>()
+    .AddAuthorization();
 
 var app = builder.Build();
 
-app.MapGraphQL();
-
 await CosmosInitializer.Initialize(app);
+
+app.UseRouting();
+
+app.UseAuthentication();
+
+app.UseAuthorization();
+
+app.UseEndpoints(endpoints => endpoints.MapGraphQL());
 
 app.UseHttpsRedirection();
 

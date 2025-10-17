@@ -6,8 +6,11 @@ using MovieDatabase.Api.Application.Films.GetDirectors;
 using MovieDatabase.Api.Application.Films.GetFilms;
 using MovieDatabase.Api.Application.Films.GetGenres;
 using MovieDatabase.Api.Application.Films.GetProducers;
+using MovieDatabase.Api.Application.Users.AuthenticateUser;
+using MovieDatabase.Api.Application.Users.CreateUser;
 using MovieDatabase.Api.Core.Cqrs;
 using MovieDatabase.Api.Core.Dtos;
+using MovieDatabase.Api.Core.Dtos.Users;
 
 namespace MovieDatabase.Api.Application;
 
@@ -33,6 +36,8 @@ public static class ApplicationExtensions
         services.AddScoped<IRequestHandler<GetGenresRequest, IEnumerable<GenreDto>>, GetGenresRequestHandler>();
         services.AddScoped<IRequestHandler<GetDirectorsRequest, IEnumerable<DirectorDto>>, GetDirectorsRequestHandler>();
         services.AddScoped<IRequestHandler<GetProducersRequest, IEnumerable<ProducerDto>>, GetProducersRequestHandler>();
+        services.AddScoped<IRequestHandler<CreateUserRequest, UserCredentialsDto>, CreateUserRequestHandler>();
+        services.AddScoped<IRequestHandler<AuthenticateUserRequest, UserCredentialsDto>, AuthenticateUserRequestHandler>();
 
         return services;
     }

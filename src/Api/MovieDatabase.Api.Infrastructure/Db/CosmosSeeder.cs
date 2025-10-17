@@ -1,6 +1,10 @@
 ﻿using Microsoft.Azure.Cosmos;
 
 using MovieDatabase.Api.Core.Documents.Films;
+using MovieDatabase.Api.Core.Documents.Users;
+using MovieDatabase.Api.Core.Utils;
+
+using User = MovieDatabase.Api.Core.Documents.Users.User;
 
 namespace MovieDatabase.Api.Infrastructure.Db;
 
@@ -55,6 +59,34 @@ public static class CosmosSeeder
         foreach (var movie in movies)
         {
             await filmContainer.CreateItemAsync(movie);
+        }
+    }
+
+    public static async Task SeedUsers(Database db)
+    {
+        var userContainer = db.GetContainer(nameof(User));
+        
+        var users = new List<User>
+        {
+            new()
+            {
+                Username = "admin",
+                Email = "admin@example.com",
+                PasswordHash = PasswordUtils.HashPassword("test"),
+                Role = UserRoles.Admin
+            },
+            new()
+            {
+                Username = "user",
+                Email = "user@example.com",
+                PasswordHash = PasswordUtils.HashPassword("test_user"),
+                Role = UserRoles.User
+            }
+        };
+
+        foreach (var user in users)
+        {
+            await userContainer.UpsertItemAsync(user);
         }
     }
 }

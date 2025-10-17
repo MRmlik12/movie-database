@@ -1,4 +1,32 @@
 @MovieDatabase.Api_HostAddress = http://localhost:5237
+@jwt_token = 
+
+### Login user to get JWT
+POST {{MovieDatabase.Api_HostAddress}}/graphql
+Content-Type: application/json
+
+{
+  "query": "mutation{ loginUser(request: { email: \"admin@example.com\", password: \"test\" }) { id username email role token expireTime } }"
+}
+
+### Register user (optional) – use this if you don't have an account
+POST {{MovieDatabase.Api_HostAddress}}/graphql
+Content-Type: application/json
+
+{
+  "query": "mutation{ registerUser(request: { username: \"newuser\", email: \"newuser@example.com\", password: \"StrongP@ssw0rd!\" }) { id username email role token expireTime } }"
+}
+
+### Create film (requires Authorization: Bearer {{jwt_token}})
+POST {{MovieDatabase.Api_HostAddress}}/graphql
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "query": "mutation { createFilm(input: { title: \"Interstellar\", releaseDate: \"2014-11-07\", description: \"Explorers travel through a wormhole in space\", actors: [ { id: null, name: \"Matthew\", surname: \"McConaughey\" }, { id: null, name: \"Anne\", surname: \"Hathaway\" } ], genres: [ { id: null, name: \"Science Fiction\" }, { id: null, name: \"Adventure\" } ], director: { id: null, name: \"Christopher\", surname: \"Nolan\" }, producer: { id: null, name: \"Emma Thomas\", surname: null } }) { id title description releaseDate director { name surname } producer { name } actors { name surname } genres { name } } }"
+}
+
+###
 
 GET {{MovieDatabase.Api_HostAddress}}/weatherforecast/
 Accept: application/json
