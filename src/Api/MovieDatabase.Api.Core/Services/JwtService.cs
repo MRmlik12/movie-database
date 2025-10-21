@@ -6,13 +6,14 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 using MovieDatabase.Api.Core.Documents.Users;
+using MovieDatabase.Api.Core.Jwt;
 
 namespace MovieDatabase.Api.Core.Services;
 
 public class JwtService(IOptions<JwtSettings> options) : IJwtService
 {
     private readonly JwtSettings _settings = options.Value;
-    
+
     public (string? token, DateTime expireDate) GenerateJwtToken(User user)
     {
         var now = DateTime.UtcNow;
@@ -23,7 +24,7 @@ public class JwtService(IOptions<JwtSettings> options) : IJwtService
             new(JwtRegisteredClaimNames.Jti, user.Id.ToString()),
             new(JwtRegisteredClaimNames.Sub, user.Name),
             new(JwtRegisteredClaimNames.Email, user.Email),
-            new("kid", Guid.NewGuid().ToString()),
+            new(JwtExtendedClaimTypes.Kid, Guid.NewGuid().ToString()),
             new(ClaimTypes.Role, user.Role.ToString()),
         };
 

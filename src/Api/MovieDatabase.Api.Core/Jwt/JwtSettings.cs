@@ -1,4 +1,4 @@
-﻿namespace MovieDatabase.Api.Core.Services;
+﻿namespace MovieDatabase.Api.Core.Jwt;
 
 public class JwtSettings
 {

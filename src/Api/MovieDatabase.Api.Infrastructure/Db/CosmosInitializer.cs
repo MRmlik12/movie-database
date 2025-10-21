@@ -14,14 +14,15 @@ public static class CosmosInitializer
         var wrapper = serviceScope.ServiceProvider.GetRequiredService<CosmosWrapper>();
 
         await wrapper.InitializeContainers();
-        
+
         var userContainer = wrapper.Movies.GetContainer(nameof(User));
         var userIter = userContainer.GetItemQueryIterator<User>("SELECT TOP 1 * FROM c");
         var users = await userIter.ReadNextAsync();
-        
+
+        var generatedUsers = Enumerable.Empty<User>();
         if (users.Count == 0)
         {
-            await CosmosSeeder.SeedUsers(wrapper.Movies);
+            generatedUsers = await CosmosSeeder.SeedUsers(wrapper.Movies);
         }
 
         var filmContainer = wrapper.Movies.GetContainer(nameof(Film));
@@ -30,7 +31,11 @@ public static class CosmosInitializer
 
         if (films.Count == 0)
         {
-            await CosmosSeeder.SeedFilms(wrapper.Movies);
+            var adminUser = generatedUsers
+                .AsQueryable()
+                .First(x => x.Role == UserRoles.Administrator);
+
+            await CosmosSeeder.SeedFilms(wrapper.Movies, adminUser);
         }
     }
 }

@@ -16,15 +16,9 @@ public class FilmRepository(CosmosWrapper wrapper) : IFilmRepository
 
     public async Task<Film?> GetByTitle(string title)
     {
-        try
-        {
-            var response = await Container.ReadItemAsync<Film>(title, new PartitionKey(title));
-            return response?.Resource;
-        }
-        catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
-        {
-            return null;
-        }
+        var response = await Container.ReadItemAsync<Film>(title, new PartitionKey(title));
+
+        return response?.Resource;
     }
 
     public async Task<Film?> GetById(string id)

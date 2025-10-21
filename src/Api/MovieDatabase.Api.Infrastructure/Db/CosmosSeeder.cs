@@ -10,7 +10,7 @@ namespace MovieDatabase.Api.Infrastructure.Db;
 
 public static class CosmosSeeder
 {
-    public static async Task SeedFilms(Database db)
+    public static async Task SeedFilms(Database db, User admin)
     {
         var filmContainer = db.GetContainer(nameof(Film));
 
@@ -34,7 +34,7 @@ public static class CosmosSeeder
                     new Genre(null, "Thriller")
                 ],
                 Description = "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a CEO.",
-                CreatorId = Guid.NewGuid().ToString()
+                CreatorId = admin.Id.ToString()
             },
             new()
             {
@@ -54,7 +54,7 @@ public static class CosmosSeeder
                     new Genre(null, "Science Fiction")
                 ],
                 Description = "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.",
-                CreatorId = Guid.NewGuid().ToString()
+                CreatorId = admin.Id.ToString()
             }
         };
 
@@ -64,10 +64,10 @@ public static class CosmosSeeder
         }
     }
 
-    public static async Task SeedUsers(Database db)
+    public static async Task<List<User>> SeedUsers(Database db)
     {
         var userContainer = db.GetContainer(nameof(User));
-        
+
         var users = new List<User>
         {
             new()
@@ -90,5 +90,7 @@ public static class CosmosSeeder
         {
             await userContainer.UpsertItemAsync(user);
         }
+
+        return users;
     }
 }

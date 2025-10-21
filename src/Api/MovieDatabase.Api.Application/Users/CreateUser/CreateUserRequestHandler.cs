@@ -24,10 +24,10 @@ public class CreateUserRequestHandler(IUserRepository userRepository, IJwtServic
         var (token, expireDate) = jwtService.GenerateJwtToken(user);
 
         var userDto = UserCredentialsDto.From(user);
-        
+
         userDto.Token = token;
         userDto.ExpireTime = expireDate;
-        
+
         return userDto;
     }
 }

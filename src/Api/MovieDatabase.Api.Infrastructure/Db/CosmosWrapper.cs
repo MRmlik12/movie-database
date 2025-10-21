@@ -13,7 +13,7 @@ public class CosmosWrapper(CosmosClient cosmosClient)
     internal async Task InitializeContainers()
     {
         await cosmosClient.CreateDatabaseIfNotExistsAsync(nameof(Movies));
-        
+
         await Movies.CreateContainerIfNotExistsAsync(nameof(Film), Film.PartitionKey);
         await Movies.CreateContainerIfNotExistsAsync(nameof(User), User.PartitionKey);
     }

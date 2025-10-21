@@ -8,25 +8,25 @@ namespace MovieDatabase.Api.Infrastructure.Db.Repositories;
 public class UserRepository(CosmosWrapper wrapper) : IUserRepository
 {
     private Container Container { get; } = wrapper.Movies.GetContainer(nameof(User));
-    
+
     public async Task Add(User user)
     {
         await Container.UpsertItemAsync(user);
     }
-    
+
     public async Task<User?> GetByEmail(string email)
     {
         using var iter = Container.GetItemLinqQueryable<User>()
             .Where(u => u.Email == email)
             .ToFeedIterator();
+        
+        //TODO: Fix query properties serialization issue
+        var quer = Container.GetItemLinqQueryable<User>()
+            .Where(u => u.Email == email)
+            .ToQueryDefinition();
 
-        while (iter.HasMoreResults)
-        {
-            var response = await iter.ReadNextAsync();
-            
-            return response.SingleOrDefault();
-        }
+        var response = await iter.ReadNextAsync();
 
-        return null;
+        return response.SingleOrDefault();
     }
 }

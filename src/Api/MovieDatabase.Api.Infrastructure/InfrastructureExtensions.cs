@@ -49,7 +49,7 @@ public static class InfrastructureExtensions
                     ValidAudience = configuration["Jwt:Audience"],
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(configuration["Jwt:Key"])),
-                    RoleClaimType = ClaimTypes.Role 
+                    RoleClaimType = ClaimTypes.Role
                 };
             });
 

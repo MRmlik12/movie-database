@@ -17,19 +17,19 @@ public class AuthenticateUserRequestHandler(IUserRepository userRepository, IJwt
         {
             throw new InvalidUserCredentialsApplicationException();
         }
-        
+
         var isPasswordValid = PasswordUtils.VerifyPassword(request.Password, user.PasswordHash);
         if (!isPasswordValid)
         {
             throw new InvalidUserCredentialsApplicationException();
         }
-        
+
         var (token, expireDate) = jwtService.GenerateJwtToken(user);
         var userDto = UserCredentialsDto.From(user);
-        
+
         userDto.Token = token;
         userDto.ExpireTime = expireDate;
-        
+
         return userDto;
     }
 }

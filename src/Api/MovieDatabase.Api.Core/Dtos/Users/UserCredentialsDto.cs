@@ -7,7 +7,7 @@ public record UserCredentialsDto(string Id, string Username, string Email, strin
 {
     public string? Token { get; set; }
     public DateTime? ExpireTime { get; set; }
-    
+
     public static UserCredentialsDto From(User from)
         => new(
             from.Id.ToString(),

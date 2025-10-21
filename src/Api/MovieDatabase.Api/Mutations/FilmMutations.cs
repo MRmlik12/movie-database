@@ -20,7 +20,7 @@ public class FilmMutations
 
         var request = CreateFilmRequest.From(input);
         request.CreatorId = userId?.Value;
-        
+
         var result = await dispatcher.Dispatch(request);
 
         return result;
