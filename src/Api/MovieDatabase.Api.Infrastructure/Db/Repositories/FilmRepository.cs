@@ -14,11 +14,17 @@ public class FilmRepository(CosmosWrapper wrapper) : IFilmRepository
         await Container.UpsertItemAsync(film);
     }
 
-    public async Task<Film?> GetByName(string name)
+    public async Task<Film?> GetByTitle(string title)
     {
-        var response = await Container.ReadItemAsync<Film>(name, new PartitionKey(name));
-
-        return response?.Resource;
+        try
+        {
+            var response = await Container.ReadItemAsync<Film>(title, new PartitionKey(title));
+            return response?.Resource;
+        }
+        catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return null;
+        }
     }
 
     public async Task<Film?> GetById(string id)

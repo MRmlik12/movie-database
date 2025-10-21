@@ -11,7 +11,7 @@ public record UserCredentialsDto(string Id, string Username, string Email, strin
     public static UserCredentialsDto From(User from)
         => new(
             from.Id.ToString(),
-            from.Username,
+            from.Name,
             from.Email,
             Enum.GetName(from.Role)
         );

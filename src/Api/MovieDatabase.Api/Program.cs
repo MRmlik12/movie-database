@@ -5,12 +5,11 @@ using MovieDatabase.Api.Application;
 using MovieDatabase.Api.Core;
 using MovieDatabase.Api.Infrastructure;
 using MovieDatabase.Api.Infrastructure.Db;
+using MovieDatabase.Api.Infrastructure.HttpInterceptors;
 using MovieDatabase.Api.Mutations;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.AddAzureCosmosClient(connectionName: "movies-database-cosmos", configureClientOptions: opt =>
 {
@@ -24,24 +23,23 @@ builder.Services.AddApplicationDefaults();
 builder.Services.AddInfrastructureDefaults(builder.Configuration);
 builder.Services.AddCoreDefaults(builder.Configuration);
 builder.Services.AddGraphQLServer()
+    .AddAuthorization()
+    // .AddHttpRequestInterceptor<AppHttpRequestInterceptor>()
     .AddMutationType(d => d.Name("Mutation"))
     .AddTypeExtension<FilmMutations>()
     .AddTypeExtension<UserMutations>()
-    .AddQueryType<Query>()
-    .AddAuthorization();
+    .ModifyRequestOptions(opt => opt.IncludeExceptionDetails = builder.Environment.IsDevelopment())
+    .AddQueryType<Query>();
 
 var app = builder.Build();
 
 await CosmosInitializer.Initialize(app);
 
-app.UseRouting();
-
+// Minimal API: make sure authentication middleware runs and MapGraphQL is used
+app.UseHttpsRedirection();
 app.UseAuthentication();
-
 app.UseAuthorization();
 
-app.UseEndpoints(endpoints => endpoints.MapGraphQL());
-
-app.UseHttpsRedirection();
+app.MapGraphQL();
 
 app.Run();

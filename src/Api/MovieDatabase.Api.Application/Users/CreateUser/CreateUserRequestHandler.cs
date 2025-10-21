@@ -13,7 +13,7 @@ public class CreateUserRequestHandler(IUserRepository userRepository, IJwtServic
     {
         var user = new User
         {
-            Username = request.Username,
+            Name = request.Username,
             Email = request.Email,
             PasswordHash = PasswordUtils.HashPassword(request.Password),
             Role = UserRoles.User

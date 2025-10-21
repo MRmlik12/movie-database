@@ -33,7 +33,8 @@ public static class CosmosSeeder
                     new Genre(null, "Science Fiction"),
                     new Genre(null, "Thriller")
                 ],
-                Description = "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a CEO."
+                Description = "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a CEO.",
+                CreatorId = Guid.NewGuid().ToString()
             },
             new()
             {
@@ -52,7 +53,8 @@ public static class CosmosSeeder
                     new Genre(null, "Action"),
                     new Genre(null, "Science Fiction")
                 ],
-                Description = "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers."
+                Description = "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.",
+                CreatorId = Guid.NewGuid().ToString()
             }
         };
 
@@ -70,14 +72,14 @@ public static class CosmosSeeder
         {
             new()
             {
-                Username = "admin",
+                Name = "admin",
                 Email = "admin@example.com",
                 PasswordHash = PasswordUtils.HashPassword("test"),
-                Role = UserRoles.Admin
+                Role = UserRoles.Administrator
             },
             new()
             {
-                Username = "user",
+                Name = "user",
                 Email = "user@example.com",
                 PasswordHash = PasswordUtils.HashPassword("test_user"),
                 Role = UserRoles.User

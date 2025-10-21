@@ -18,11 +18,13 @@ public class JwtService(IOptions<JwtSettings> options) : IJwtService
         var now = DateTime.UtcNow;
         var expires = now.AddMinutes(_settings.ExpirationMinutes);
 
-        var claims = new[]
+        var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim(ClaimTypes.Role, Enum.GetName(user.Role))
+            new(JwtRegisteredClaimNames.Jti, user.Id.ToString()),
+            new(JwtRegisteredClaimNames.Sub, user.Name),
+            new(JwtRegisteredClaimNames.Email, user.Email),
+            new("kid", Guid.NewGuid().ToString()),
+            new(ClaimTypes.Role, user.Role.ToString()),
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.Key));
@@ -32,7 +34,6 @@ public class JwtService(IOptions<JwtSettings> options) : IJwtService
             issuer: _settings.Issuer,
             audience: _settings.Audience,
             claims: claims,
-            notBefore: now,
             expires: expires,
             signingCredentials: creds
         );

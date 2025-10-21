@@ -6,7 +6,7 @@ namespace MovieDatabase.Api.Infrastructure.Db.Repositories;
 public interface IFilmRepository
 {
     Task Add(Film film);
-    Task<Film?> GetByName(string name);
+    Task<Film?> GetByTitle(string title);
     Task<Film?> GetById(string id);
     Task<IEnumerable<Actor>> GetActors(string? searchTerm);
     Task<IEnumerable<Genre>> GetGenres(string? searchTerm);

@@ -11,7 +11,7 @@ public class CreateFilmRequestHandler(IFilmRepository filmRepository) : IRequest
     public async Task<FilmDto> HandleAsync(CreateFilmRequest request)
     {
         var filmTitle = request.Title.TrimStart().TrimEnd();
-        var existingFilm = await filmRepository.GetByName(filmTitle);
+        var existingFilm = await filmRepository.GetByTitle(filmTitle);
         if (existingFilm is not null)
         {
             throw new FilmExistsApplicationException();
@@ -26,7 +26,7 @@ public class CreateFilmRequestHandler(IFilmRepository filmRepository) : IRequest
             Genres = request.Genres.Select(g => new Genre(g.Id, g.Name)).ToList(),
             Director = new DirectorInfo(request.Director.Id, request.Director.Name, request.Director.Surname),
             Producer = new ProducerInfo(request.Producer.Id, request.Producer.Name),
-            CreatorId = string.Empty
+            CreatorId = request.CreatorId 
         };
 
         await filmRepository.Add(film);
