@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
-using MovieDatabase.Api.Core.Documents;
 using MovieDatabase.Api.Core.Documents.Films;
+using MovieDatabase.Api.Core.Documents.Users;
 
 namespace MovieDatabase.Api.Infrastructure.Db;
 
@@ -15,13 +15,27 @@ public static class CosmosInitializer
 
         await wrapper.InitializeContainers();
 
+        var userContainer = wrapper.Movies.GetContainer(nameof(User));
+        var userIter = userContainer.GetItemQueryIterator<User>("SELECT TOP 1 * FROM c");
+        var users = await userIter.ReadNextAsync();
+
+        var generatedUsers = Enumerable.Empty<User>();
+        if (users.Count == 0)
+        {
+            generatedUsers = await CosmosSeeder.SeedUsers(wrapper.Movies);
+        }
+
         var filmContainer = wrapper.Movies.GetContainer(nameof(Film));
-        var iter = filmContainer.GetItemQueryIterator<Film>("SELECT TOP 1 * FROM c");
-        var films = await iter.ReadNextAsync();
+        var filmIter = filmContainer.GetItemQueryIterator<Film>("SELECT TOP 1 * FROM c");
+        var films = await filmIter.ReadNextAsync();
 
         if (films.Count == 0)
         {
-            await CosmosSeeder.SeedFilms(wrapper.Movies);
+            var adminUser = generatedUsers
+                .AsQueryable()
+                .First(x => x.Role == UserRoles.Administrator);
+
+            await CosmosSeeder.SeedFilms(wrapper.Movies, adminUser);
         }
     }
 }

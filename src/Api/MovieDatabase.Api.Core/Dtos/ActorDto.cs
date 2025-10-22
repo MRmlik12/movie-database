@@ -1,5 +1,4 @@
-﻿using MovieDatabase.Api.Core.Documents;
-using MovieDatabase.Api.Core.Documents.Films;
+﻿using MovieDatabase.Api.Core.Documents.Films;
 using MovieDatabase.Api.Core.Interfaces;
 
 namespace MovieDatabase.Api.Core.Dtos;
@@ -12,5 +11,10 @@ public record ActorDto(string Id, string Name, string Surname) :
         => new(document.Id.ToString(), document.Name, document.Surname);
 
     public static Actor From(ActorDto document)
-        => new(document.Id, document.Name, document.Surname);
+        => new()
+        {
+            Id = Guid.Parse(document.Id),
+            Name = document.Name,
+            Surname = document.Surname
+        };
 }

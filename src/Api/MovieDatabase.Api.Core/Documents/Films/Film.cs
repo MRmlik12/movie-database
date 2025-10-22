@@ -14,4 +14,5 @@ public class Film : BaseDocument
     public List<Genre> Genres { get; set; }
     public ProducerInfo Producer { get; set; }
     public string? Description { get; set; }
+    public string CreatorId { get; set; }
 }

@@ -14,9 +14,9 @@ public class FilmRepository(CosmosWrapper wrapper) : IFilmRepository
         await Container.UpsertItemAsync(film);
     }
 
-    public async Task<Film?> GetByName(string name)
+    public async Task<Film?> GetByTitle(string title)
     {
-        var response = await Container.ReadItemAsync<Film>(name, new PartitionKey(name));
+        var response = await Container.ReadItemAsync<Film>(title, new PartitionKey(title));
 
         return response?.Resource;
     }
