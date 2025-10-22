@@ -19,11 +19,6 @@ public class UserRepository(CosmosWrapper wrapper) : IUserRepository
         using var iter = Container.GetItemLinqQueryable<User>()
             .Where(u => u.Email == email)
             .ToFeedIterator();
-        
-        //TODO: Fix query properties serialization issue
-        var quer = Container.GetItemLinqQueryable<User>()
-            .Where(u => u.Email == email)
-            .ToQueryDefinition();
 
         var response = await iter.ReadNextAsync();
 

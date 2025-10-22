@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+﻿using System.Text.Json.Serialization;
 
 namespace MovieDatabase.Api.Core.Documents.Users;
 
@@ -12,6 +11,6 @@ public class User : BaseDocument
     public string Email { get; set; } = null!;
     public string PasswordHash { get; set; } = null!;
 
-    [JsonConverter(typeof(StringEnumConverter))]
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public UserRoles Role { get; set; }
 }

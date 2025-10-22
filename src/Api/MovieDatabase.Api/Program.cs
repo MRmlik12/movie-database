@@ -1,3 +1,6 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 using MovieDatabase.Api;
 using MovieDatabase.Api.Application;
 using MovieDatabase.Api.Core;
@@ -9,8 +12,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddAzureCosmosClient(connectionName: "movies-database-cosmos", configureClientOptions: opt =>
 {
-    
-    opt.Serializer = new NewtonsoftJsonCosmosSerializer();
+    opt.UseSystemTextJsonSerializerWithOptions = new JsonSerializerOptions
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PreferredObjectCreationHandling = JsonObjectCreationHandling.Populate,
+        Converters = { new JsonStringEnumConverter() }
+    };
 });
 
 builder.Services.AddApplicationDefaults();

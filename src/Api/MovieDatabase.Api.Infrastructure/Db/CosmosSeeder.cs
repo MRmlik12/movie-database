@@ -20,18 +20,18 @@ public static class CosmosSeeder
             {
                 Title = "Inception",
                 ReleaseDate = new DateOnly(2010, 7, 16),
-                Director = new DirectorInfo(null, "Christopher", "Nolan"),
-                Producer = new ProducerInfo(null, "Emma Thomas"),
+                Director = new DirectorInfo { Name = "Christopher", Surname = "Nolan" },
+                Producer = new ProducerInfo { Name = "Emma Thomas" },
                 Actors =
                 [
-                    new Actor(null, "Leonardo", "DiCaprio"),
-                    new Actor(null, "Joseph", "Gordon-Levitt"),
-                    new Actor(null, "Ellen", "Page")
+                    new Actor { Name = "Leonardo", Surname = "DiCaprio" },
+                    new Actor { Name = "Joseph", Surname = "Gordon-Levitt" },
+                    new Actor { Name = "Ellen", Surname = "Page" }
                 ],
                 Genres =
                 [
-                    new Genre(null, "Science Fiction"),
-                    new Genre(null, "Thriller")
+                    new Genre { Name = "Science Fiction" },
+                    new Genre { Name = "Thriller" }
                 ],
                 Description = "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a CEO.",
                 CreatorId = admin.Id.ToString()
@@ -40,18 +40,18 @@ public static class CosmosSeeder
             {
                 Title = "The Matrix",
                 ReleaseDate = new DateOnly(1999, 3, 31),
-                Director = new DirectorInfo(null, "Lana", "Wachowski"),
-                Producer = new ProducerInfo(null, "Joel Silver"),
+                Director = new DirectorInfo { Name = "Lana", Surname = "Wachowski" },
+                Producer = new ProducerInfo { Name = "Joel Silver" },
                 Actors =
                 [
-                    new Actor(null, "Keanu", "Reeves"),
-                    new Actor(null, "Laurence", "Fishburne"),
-                    new Actor(null, "Carrie-Anne", "Moss")
+                    new Actor { Name = "Keanu", Surname = "Reeves" },
+                    new Actor { Name = "Laurence", Surname = "Fishburne" },
+                    new Actor { Name = "Carrie-Anne", Surname = "Moss" }
                 ],
                 Genres =
                 [
-                    new Genre(null, "Action"),
-                    new Genre(null, "Science Fiction")
+                    new Genre { Name = "Action" },
+                    new Genre { Name = "Science Fiction" }
                 ],
                 Description = "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.",
                 CreatorId = admin.Id.ToString()
