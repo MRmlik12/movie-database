@@ -1,5 +1,4 @@
 using MovieDatabase.Api.Core.Documents.Films;
-using MovieDatabase.Api.Core.Dtos;
 
 namespace MovieDatabase.Api.Infrastructure.Db.Repositories;
 
@@ -13,4 +12,6 @@ public interface IFilmRepository
     Task<IEnumerable<DirectorInfo>> GetDirectors(string? searchTerm);
     Task<IEnumerable<ProducerInfo>> GetProducers(string? searchTerm);
     Task<IEnumerable<Film>> GetAll(string? title);
+    Task Delete(Film film);
+    Task Update(Film film);
 }
