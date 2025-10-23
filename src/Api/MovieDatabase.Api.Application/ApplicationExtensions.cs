@@ -1,6 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 
 using MovieDatabase.Api.Application.Films.CreateFilm;
+using MovieDatabase.Api.Application.Films.DeleteFilm;
+using MovieDatabase.Api.Application.Films.EditFilm;
 using MovieDatabase.Api.Application.Films.GetActors;
 using MovieDatabase.Api.Application.Films.GetDirectors;
 using MovieDatabase.Api.Application.Films.GetFilms;
@@ -38,6 +40,8 @@ public static class ApplicationExtensions
         services.AddScoped<IRequestHandler<GetProducersRequest, IEnumerable<ProducerDto>>, GetProducersRequestHandler>();
         services.AddScoped<IRequestHandler<CreateUserRequest, UserCredentialsDto>, CreateUserRequestHandler>();
         services.AddScoped<IRequestHandler<AuthenticateUserRequest, UserCredentialsDto>, AuthenticateUserRequestHandler>();
+        services.AddScoped<IRequestHandler<DeleteFilmRequest, string>, DeleteFilmRequestHandler>();
+        services.AddScoped<IRequestHandler<EditFilmRequest, FilmDto>, EditFilmRequestHandler>();
 
         return services;
     }

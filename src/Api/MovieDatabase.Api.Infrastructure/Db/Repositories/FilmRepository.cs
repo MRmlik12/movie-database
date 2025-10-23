@@ -23,14 +23,24 @@ public class FilmRepository(CosmosWrapper wrapper) : IFilmRepository
 
     public async Task<Film?> GetById(string id)
     {
-        var response = await Container.ReadItemAsync<Film>(id, new PartitionKey(id));
+        using var iter = Container.GetItemLinqQueryable<Film>()
+            .Where(f => f.Id == Guid.Parse(id))
+            .ToFeedIterator();
 
-        return response?.Resource;
+        while (iter.HasMoreResults)
+        {
+            var response = await iter.ReadNextAsync();
+
+            return response.Resource.FirstOrDefault();
+        }
+
+        return null;
     }
 
     public async Task<IEnumerable<Actor>> GetActors(string? searchTerm)
     {
         var query = Container.GetItemLinqQueryable<Film>()
+            .Where(f => !f.IsDeleted)
             .SelectMany(f => f.Actors);
 
         if (!string.IsNullOrEmpty(searchTerm))
@@ -64,6 +74,7 @@ public class FilmRepository(CosmosWrapper wrapper) : IFilmRepository
     public async Task<IEnumerable<Genre>> GetGenres(string? searchTerm)
     {
         var query = Container.GetItemLinqQueryable<Film>()
+            .Where(f => !f.IsDeleted)
             .SelectMany(f => f.Genres);
 
         if (!string.IsNullOrEmpty(searchTerm))
@@ -87,6 +98,7 @@ public class FilmRepository(CosmosWrapper wrapper) : IFilmRepository
     public async Task<IEnumerable<DirectorInfo>> GetDirectors(string? searchTerm)
     {
         var query = Container.GetItemLinqQueryable<Film>()
+            .Where(f => !f.IsDeleted)
             .Select(f => f.Director);
 
         if (!string.IsNullOrEmpty(searchTerm))
@@ -120,6 +132,7 @@ public class FilmRepository(CosmosWrapper wrapper) : IFilmRepository
     public async Task<IEnumerable<ProducerInfo>> GetProducers(string? searchTerm)
     {
         var query = Container.GetItemLinqQueryable<Film>()
+            .Where(f => !f.IsDeleted)
             .Select(f => f.Producer);
 
         if (!string.IsNullOrEmpty(searchTerm))
@@ -142,7 +155,8 @@ public class FilmRepository(CosmosWrapper wrapper) : IFilmRepository
 
     public async Task<IEnumerable<Film>> GetAll(string? title)
     {
-        var query = Container.GetItemLinqQueryable<Film>();
+        var query = Container.GetItemLinqQueryable<Film>()
+            .Where(f => !f.IsDeleted);
 
         if (!string.IsNullOrEmpty(title))
         {
@@ -160,5 +174,17 @@ public class FilmRepository(CosmosWrapper wrapper) : IFilmRepository
         }
 
         return results;
+    }
+
+    public async Task Delete(Film film)
+    {
+        film.IsDeleted = true;
+        
+        await Container.UpsertItemAsync(film);
+    }
+
+    public async Task Update(Film film)
+    {
+       await Container.UpsertItemAsync(film);
     }
 }
