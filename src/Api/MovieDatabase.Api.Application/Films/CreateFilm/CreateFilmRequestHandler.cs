@@ -12,6 +12,7 @@ public class CreateFilmRequestHandler(IFilmRepository filmRepository) : IRequest
     {
         var filmTitle = request.Title.TrimStart().TrimEnd();
         var existingFilm = await filmRepository.GetByTitle(filmTitle);
+        
         if (existingFilm is not null)
         {
             throw new FilmExistsApplicationException();

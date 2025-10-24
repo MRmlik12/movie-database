@@ -10,6 +10,6 @@ public class GetProducersRequestHandler(IFilmRepository filmRepository) : IReque
     {
         var producers = await filmRepository.GetProducers(request.SearchTerm);
 
-        return producers.Select(ProducerDto.From).ToArray();
+        return producers.Select(ProducerDto.From).DistinctBy(x => x.Name).ToArray();
     }
 }
