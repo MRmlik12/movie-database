@@ -16,9 +16,18 @@ public class FilmRepository(CosmosWrapper wrapper) : IFilmRepository
 
     public async Task<Film?> GetByTitle(string title)
     {
-        var response = await Container.ReadItemAsync<Film>(title, new PartitionKey(title));
+        using var iter = Container.GetItemLinqQueryable<Film>()
+            .Where(f => f.Title == title)
+            .ToFeedIterator();
 
-        return response?.Resource;
+        while (iter.HasMoreResults)
+        {
+            var response = await iter.ReadNextAsync();
+
+            return response.Resource.FirstOrDefault();
+        }
+
+        return null;
     }
 
     public async Task<Film?> GetById(string id)

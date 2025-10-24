@@ -10,6 +10,6 @@ public class GetGenresRequestHandler(IFilmRepository filmRepository) : IRequestH
     {
         var genres = await filmRepository.GetGenres(request.Term);
 
-        return genres.Select(GenreDto.From);
+        return genres.Select(GenreDto.From).DistinctBy(x => x.Name);
     }
 }

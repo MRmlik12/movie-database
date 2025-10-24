@@ -10,6 +10,6 @@ public class GetActorsRequestHandler(IFilmRepository filmRepository) : IRequestH
     {
         var actors = await filmRepository.GetActors(request.SearchTerm);
 
-        return actors.Select(ActorDto.From).ToArray();
+        return actors.Select(ActorDto.From).DistinctBy(x => new { x.Name, x.Surname }).ToArray();
     }
 }

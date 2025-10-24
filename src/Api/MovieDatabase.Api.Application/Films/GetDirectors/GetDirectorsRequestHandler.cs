@@ -10,6 +10,6 @@ public class GetDirectorsRequestHandler(IFilmRepository filmRepository) : IReque
     {
         var directors = await filmRepository.GetDirectors(request.Term);
 
-        return directors.Select(DirectorDto.From);
+        return directors.Select(DirectorDto.From).DistinctBy(x => new { x.Name, x.Surname });
     }
 }
