@@ -23,7 +23,9 @@ builder.AddAzureCosmosClient(connectionName: "movies-database-cosmos", configure
 builder.Services.AddApplicationDefaults();
 builder.Services.AddInfrastructureDefaults(builder.Configuration);
 builder.Services.AddCoreDefaults(builder.Configuration);
-builder.Services.AddGraphQLServer()
+builder.Services.AddHttpContextAccessor();
+builder.Services
+    .AddGraphQLServer()
     .AddAuthorization()
     .AddMutationType(d => d.Name("Mutation"))
     .AddTypeExtension<FilmMutations>()
@@ -41,3 +43,5 @@ app.UseAuthorization();
 app.MapGraphQL();
 
 app.Run();
+
+public partial class Program {}

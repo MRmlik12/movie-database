@@ -79,6 +79,13 @@ public static class CosmosSeeder
             },
             new()
             {
+                Name = "moderator",
+                Email = "moderator@example.com",
+                PasswordHash = PasswordUtils.HashPassword("test"),
+                Role = UserRoles.Moderator
+            },
+            new()
+            {
                 Name = "user",
                 Email = "user@example.com",
                 PasswordHash = PasswordUtils.HashPassword("test_user"),

@@ -164,12 +164,12 @@ public class FilmRepository(CosmosWrapper wrapper) : IFilmRepository
 
     public async Task<IEnumerable<Film>> GetAll(string? title)
     {
-        var query = Container.GetItemLinqQueryable<Film>()
+        IQueryable<Film> query = Container.GetItemLinqQueryable<Film>()
             .Where(f => !f.IsDeleted);
 
         if (!string.IsNullOrEmpty(title))
         {
-            query = (IOrderedQueryable<Film>)query.Where(f => f.Title.StartsWith(title));
+            query = query.Where(f => f.Title.Contains(title));
         }
 
         using var iterator = query.ToFeedIterator();
