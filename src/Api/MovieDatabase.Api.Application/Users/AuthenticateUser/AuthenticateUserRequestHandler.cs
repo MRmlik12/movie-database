@@ -13,7 +13,7 @@ public class AuthenticateUserRequestHandler(IUserRepository userRepository, IJwt
     {
         var user = await userRepository.GetByEmail(request.Email);
 
-        if (user is null)
+        if (user is null || string.IsNullOrWhiteSpace(request.Password))
         {
             throw new InvalidUserCredentialsApplicationException();
         }
