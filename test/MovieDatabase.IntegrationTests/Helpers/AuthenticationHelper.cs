@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Headers;
-using MovieDatabase.IntegrationTests.Helpers;
+
+using MovieDatabase.IntegrationTests.Responses.Users;
 
 namespace MovieDatabase.IntegrationTests.Helpers;
 
@@ -28,10 +29,10 @@ public static class AuthenticationHelper
             }
         };
 
-        var response = await GraphQLHelper.ExecuteMutationAsync<RegisterResponse>(
+        var response = await GraphQLHelper.ExecuteMutationAsync<RegisterUserResponse>(
             client, registerMutation, variables);
 
-        return response?.Data?.RegisterUser?.Token 
+        return response?.Data?.RegisterUser?.Token
             ?? throw new Exception("Failed to register user");
     }
 
@@ -53,30 +54,15 @@ public static class AuthenticationHelper
             }
         };
 
-        var response = await GraphQLHelper.ExecuteMutationAsync<LoginResponse>(
+        var response = await GraphQLHelper.ExecuteMutationAsync<LoginUserResponse>(
             client, loginMutation, variables);
 
-        return response?.Data?.LoginUser?.Token 
+        return response?.Data?.LoginUser?.Token
             ?? throw new Exception("Failed to login as admin");
     }
 
     public static void SetAuthorizationHeader(HttpClient client, string token)
     {
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-    }
-
-    private class RegisterResponse
-    {
-        public UserCredentials? RegisterUser { get; set; }
-    }
-
-    private class LoginResponse
-    {
-        public UserCredentials? LoginUser { get; set; }
-    }
-
-    private class UserCredentials
-    {
-        public string? Token { get; set; }
     }
 }

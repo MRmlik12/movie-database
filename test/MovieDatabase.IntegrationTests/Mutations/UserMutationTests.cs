@@ -1,47 +1,48 @@
-﻿using System.Net.Http.Headers;
+﻿using MovieDatabase.Api.Application.Users.AuthenticateUser;
+using MovieDatabase.Api.Application.Users.CreateUser;
+using MovieDatabase.IntegrationTests.Fixtures;
 using MovieDatabase.IntegrationTests.Helpers;
+using MovieDatabase.IntegrationTests.Responses.Users;
+
+using Shouldly;
 
 namespace MovieDatabase.IntegrationTests.Mutations;
 
 [Collection("AspireAppHost")]
-public class UserMutationTests : IClassFixture<AspireAppHostFixture>
+public class UserMutationTests(AspireAppHostFixture fixture) : IClassFixture<AspireAppHostFixture>
 {
-    private readonly HttpClient _httpClient;
-
-    public UserMutationTests(AspireAppHostFixture fixture)
-    {
-        _httpClient = fixture.CreateHttpClient("movies-db-api");
-    }
+    private readonly HttpClient _httpClient = fixture.CreateHttpClient("movies-db-api");
 
     [Fact]
     public async Task RegisterUser_WithValidData_ShouldReturnCredentials()
     {
-        var mutation = @"
-            mutation RegisterUser($request: CreateUserRequestInput!) {
-                registerUser(request: $request) {
-                    token
-                    expireTime
-                }
-            }";
+        const string mutation = """
+                                    mutation RegisterUser($request: CreateUserRequestInput!) {
+                                        registerUser(request: $request) {
+                                            token
+                                            expireTime
+                                        }
+                                    }
+                                """;
 
-        var variables = new
-        {
-            request = new
-            {
-                username = $"testuser_{Guid.NewGuid():N}",
-                email = $"test_{Guid.NewGuid():N}@example.com",
-                password = "SecurePassword123!"
-            }
-        };
+        var request = new CreateUserRequest(
+            $"testuser_{Guid.NewGuid():N}",
+            $"test_{Guid.NewGuid():N}@example.com",
+            "SecurePassword123!"
+        );
+
+        var variables = new { request };
 
         var response = await GraphQLHelper.ExecuteMutationAsync<RegisterUserResponse>(
             _httpClient, mutation, variables);
 
-        Assert.NotNull(response);
-        Assert.Null(response.Errors);
-        Assert.NotNull(response.Data?.RegisterUser);
-        Assert.NotNull(response.Data.RegisterUser.Token);
-        Assert.True(response.Data.RegisterUser.ExpireTime > DateTime.UtcNow);
+        response.ShouldNotBeNull();
+        response.Errors.ShouldBeNull();
+        response.Data.ShouldNotBeNull();
+        response.Data.ShouldNotBeNull();
+        response.Data.RegisterUser.Token.ShouldNotBeNull();
+        response.Data.RegisterUser.ExpireTime.ShouldNotBeNull();
+        (response.Data.RegisterUser.ExpireTime > DateTime.UtcNow).ShouldBeTrue();
     }
 
     [Fact]
@@ -49,123 +50,106 @@ public class UserMutationTests : IClassFixture<AspireAppHostFixture>
     {
         var email = $"duplicate_{Guid.NewGuid():N}@example.com";
 
-        var mutation = @"
-            mutation RegisterUser($request: CreateUserRequestInput!) {
-                registerUser(request: $request) {
-                    token
-                }
-            }";
+        const string mutation = """
+                                    mutation RegisterUser($request: CreateUserRequestInput!) {
+                                        registerUser(request: $request) {
+                                            token
+                                        }
+                                    }
+                                """;
 
-        var variables = new
-        {
-            request = new
-            {
-                username = "user1",
-                email = email,
-                password = "Password123!"
-            }
-        };
+        var request1 = new CreateUserRequest(
+            "user1",
+            email,
+            "Password123!"
+        );
 
-        await GraphQLHelper.ExecuteMutationAsync<RegisterUserResponse>(_httpClient, mutation, variables);
+        await GraphQLHelper.ExecuteMutationAsync<RegisterUserResponse>(_httpClient, mutation, new { request = request1 });
 
-        var variables2 = new
-        {
-            request = new
-            {
-                username = "user2",
-                email = email,
-                password = "Password123!"
-            }
-        };
+        var request2 = new CreateUserRequest(
+            "user2",
+            email,
+            "Password123!"
+        );
 
-        var response = await GraphQLHelper.ExecuteMutationAsync(_httpClient, mutation, variables2);
+        var response = await GraphQLHelper.ExecuteMutationAsync(_httpClient, mutation, new { request = request2 });
 
         var content = await response.Content.ReadAsStringAsync();
-        Assert.True(
-            content.Contains("error", StringComparison.OrdinalIgnoreCase) || 
-            content.Contains("already exists", StringComparison.OrdinalIgnoreCase) ||
-            content.Contains("duplicate", StringComparison.OrdinalIgnoreCase) ||
-            response.StatusCode == System.Net.HttpStatusCode.BadRequest,
-            "Expected error for duplicate email");
+        var hasError = content.Contains("error", StringComparison.OrdinalIgnoreCase) ||
+                       content.Contains("already exists", StringComparison.OrdinalIgnoreCase) ||
+                       content.Contains("duplicate", StringComparison.OrdinalIgnoreCase) ||
+                       response.StatusCode == System.Net.HttpStatusCode.BadRequest;
+        hasError.ShouldBeTrue("Expected error for duplicate email");
     }
 
     [Fact]
     public async Task LoginUser_WithValidCredentials_ShouldReturnToken()
     {
         var email = $"logintest_{Guid.NewGuid():N}@example.com";
-        var password = "SecurePassword123!";
+        const string password = "SecurePassword123!";
 
-        var registerMutation = @"
-            mutation RegisterUser($request: CreateUserRequestInput!) {
-                registerUser(request: $request) {
-                    token
-                }
-            }";
+        const string registerMutation = """
+                                            mutation RegisterUser($request: CreateUserRequestInput!) {
+                                                registerUser(request: $request) {
+                                                    token
+                                                }
+                                            }
+                                        """;
 
-        var registerVariables = new
-        {
-            request = new
-            {
-                username = $"loginuser_{Guid.NewGuid():N}",
-                email = email,
-                password = password
-            }
-        };
+        var registerRequest = new CreateUserRequest(
+            $"loginuser_{Guid.NewGuid():N}",
+            email,
+            password
+        );
 
         await GraphQLHelper.ExecuteMutationAsync<RegisterUserResponse>(
-            _httpClient, registerMutation, registerVariables);
+            _httpClient, registerMutation, new { request = registerRequest });
 
-        var loginMutation = @"
-            mutation LoginUser($request: AuthenticateUserRequestInput!) {
-                loginUser(request: $request) {
-                    token
-                    expireTime
-                }
-            }";
+        const string loginMutation = """
+                                         mutation LoginUser($request: AuthenticateUserRequestInput!) {
+                                             loginUser(request: $request) {
+                                                 token
+                                                 expireTime
+                                             }
+                                         }
+                                     """;
 
-        var loginVariables = new
-        {
-            request = new
-            {
-                email = email,
-                password = password
-            }
-        };
+        var loginRequest = new AuthenticateUserRequest(
+            email,
+            password
+        );
 
         var response = await GraphQLHelper.ExecuteMutationAsync<LoginUserResponse>(
-            _httpClient, loginMutation, loginVariables);
+            _httpClient, loginMutation, new { request = loginRequest });
 
-        Assert.NotNull(response);
-        Assert.Null(response.Errors);
-        Assert.NotNull(response.Data?.LoginUser);
-        Assert.NotNull(response.Data.LoginUser.Token);
+        response.ShouldNotBeNull();
+        response.Errors.ShouldBeNull();
+        response.Data.ShouldNotBeNull();
+        response.Data.LoginUser.ShouldNotBeNull();
+        response.Data.LoginUser.Token.ShouldNotBeNull();
     }
 
     [Fact]
     public async Task LoginUser_WithInvalidCredentials_ShouldReturnError()
     {
-        var mutation = @"
-            mutation LoginUser($request: AuthenticateUserRequestInput!) {
-                loginUser(request: $request) {
-                    token
-                }
-            }";
+        const string mutation = """
+                                    mutation LoginUser($request: AuthenticateUserRequestInput!) {
+                                        loginUser(request: $request) {
+                                            token
+                                        }
+                                    }
+                                """;
 
-        var variables = new
-        {
-            request = new
-            {
-                email = "nonexistent@example.com",
-                password = "WrongPassword123!"
-            }
-        };
+        var request = new AuthenticateUserRequest(
+            "nonexistent@example.com",
+            "WrongPassword123!"
+        );
 
-        var response = await GraphQLHelper.ExecuteMutationAsync(_httpClient, mutation, variables);
+        var response = await GraphQLHelper.ExecuteMutationAsync(_httpClient, mutation, new { request });
 
         var content = await response.Content.ReadAsStringAsync();
-        Assert.True(
-            content.Contains("error", StringComparison.OrdinalIgnoreCase) || 
-            response.StatusCode == System.Net.HttpStatusCode.BadRequest,
-            "Expected error for invalid credentials");
+        var hasError = content.Contains("error", StringComparison.OrdinalIgnoreCase) ||
+                       response.StatusCode == System.Net.HttpStatusCode.BadRequest;
+        hasError.ShouldBeTrue("Expected error for invalid credentials");
     }
 }

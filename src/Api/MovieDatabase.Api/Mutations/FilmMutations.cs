@@ -41,7 +41,7 @@ public class FilmMutations
 
         return result;
     }
-    
+
     [Authorize(Roles = [nameof(UserRoles.Administrator), nameof(UserRoles.Moderator)])]
     public async Task<FilmDto> EditFilm(ClaimsPrincipal claimsPrincipal, EditFilmInput input,
         [Service] IDispatcher dispatcher)

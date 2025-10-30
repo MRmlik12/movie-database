@@ -188,12 +188,12 @@ public class FilmRepository(CosmosWrapper wrapper) : IFilmRepository
     public async Task Delete(Film film)
     {
         film.IsDeleted = true;
-        
+
         await Container.UpsertItemAsync(film);
     }
 
     public async Task Update(Film film)
     {
-       await Container.UpsertItemAsync(film);
+        await Container.UpsertItemAsync(film);
     }
 }

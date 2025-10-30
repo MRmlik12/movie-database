@@ -21,7 +21,7 @@ public record EditFilmRequest(
     public record EditFilmDirectorPlaceholder(string? Id, string? Name, string? Surname);
 
     public record EditFilmProducerPlaceholder(string? Id, string? Name);
-    
+
     public string UserId { get; set; } = string.Empty;
 
     public static EditFilmRequest From(EditFilmInput from)

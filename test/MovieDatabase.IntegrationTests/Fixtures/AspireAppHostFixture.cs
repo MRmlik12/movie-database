@@ -1,7 +1,7 @@
 ﻿using Aspire.Hosting;
 using Aspire.Hosting.Testing;
 
-namespace MovieDatabase.IntegrationTests;
+namespace MovieDatabase.IntegrationTests.Fixtures;
 
 public class AspireAppHostFixture : IAsyncLifetime
 {
@@ -15,15 +15,14 @@ public class AspireAppHostFixture : IAsyncLifetime
 
         _app = await appHost.BuildAsync();
         await _app.StartAsync();
-        
-        // Give the Cosmos DB emulator extra time to fully initialize
+
         await Task.Delay(TimeSpan.FromSeconds(5));
     }
 
     public HttpClient CreateHttpClient(string resourceName)
     {
         var client = App.CreateHttpClient(resourceName);
-        // Increase timeout to 5 minutes for integration tests with Cosmos DB emulator
+
         client.Timeout = TimeSpan.FromMinutes(5);
         return client;
     }

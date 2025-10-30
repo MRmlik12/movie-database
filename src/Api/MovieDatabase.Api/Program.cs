@@ -27,6 +27,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services
     .AddGraphQLServer()
     .AddAuthorization()
+    .AddHttpRequestInterceptor<AppHttpRequestInterceptor>()
     .AddMutationType(d => d.Name("Mutation"))
     .AddTypeExtension<FilmMutations>()
     .AddTypeExtension<UserMutations>()
@@ -44,4 +45,4 @@ app.MapGraphQL();
 
 app.Run();
 
-public partial class Program {}
+public partial class Program { }

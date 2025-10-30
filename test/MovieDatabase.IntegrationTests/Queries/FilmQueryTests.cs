@@ -1,145 +1,105 @@
-﻿using MovieDatabase.IntegrationTests.Helpers;
+﻿using MovieDatabase.IntegrationTests.Fixtures;
+using MovieDatabase.IntegrationTests.Helpers;
+using MovieDatabase.IntegrationTests.Responses.Films;
+
+using Shouldly;
 
 namespace MovieDatabase.IntegrationTests.Queries;
 
 [Collection("AspireAppHost")]
-public class FilmQueryTests : IClassFixture<AspireAppHostFixture>
+public class FilmQueryTests(AspireAppHostFixture fixture) : IClassFixture<AspireAppHostFixture>
 {
-    private readonly HttpClient _httpClient;
-
-    public FilmQueryTests(AspireAppHostFixture fixture)
-    {
-        _httpClient = fixture.CreateHttpClient("movies-db-api");
-    }
+    private readonly HttpClient _httpClient = fixture.CreateHttpClient("movies-db-api");
 
     [Fact]
     public async Task GetFilms_WithoutFilter_ShouldReturnAllFilms()
     {
-        var query = @"
-            query {
-                films {
-                    id
-                    title
-                    description
-                    releaseDate
-                }
-            }";
+        const string query = """
+                                 query {
+                                     films {
+                                         id
+                                         title
+                                         description
+                                         releaseDate
+                                     }
+                                 }
+                             """;
 
         var response = await GraphQLHelper.ExecuteQueryAsync<FilmsResponse>(_httpClient, query);
 
-        Assert.NotNull(response);
-        Assert.Null(response.Errors);
-        Assert.NotNull(response.Data);
-        Assert.NotNull(response.Data.Films);
-        Assert.NotEmpty(response.Data.Films);
+        response.ShouldNotBeNull();
+        response.Errors.ShouldBeNull();
+        response.Data.ShouldNotBeNull();
+        response.Data.Films.ShouldNotBeNull();
+        response.Data.Films.ShouldNotBeEmpty();
     }
 
     [Fact]
     public async Task GetFilms_WithTitleFilter_ShouldReturnFilteredFilms()
     {
-        var query = @"
-            query GetFilmsByTitle($title: String) {
-                films(title: $title) {
-                    id
-                    title
-                    releaseDate
-                }
-            }";
+        const string query = """
+                                 query GetFilmsByTitle($title: String) {
+                                     films(title: $title) {
+                                         id
+                                         title
+                                         releaseDate
+                                     }
+                                 }
+                             """;
 
         var variables = new { title = "Test" };
 
         var response = await GraphQLHelper.ExecuteQueryAsync<FilmsResponse>(_httpClient, query, variables);
 
-        Assert.NotNull(response);
-        Assert.Null(response.Errors);
-        Assert.NotNull(response.Data);
+        response.ShouldNotBeNull();
+        response.Errors.ShouldBeNull();
+        response.Data.ShouldNotBeNull();
     }
 
     [Fact]
     public async Task GetFilms_ShouldIncludeActorsAndDirectors()
     {
-        var query = @"
-            query {
-                films {
-                    id
-                    title
-                    actors {
-                        id
-                        name
-                        surname
-                    }
-                    director {
-                        id
-                        name
-                        surname
-                    }
-                    genres {
-                        id
-                        name
-                    }
-                    producer {
-                        id
-                        name
-                    }
-                }
-            }";
+        const string query = """
+                                 query {
+                                     films {
+                                         id
+                                         title
+                                         actors {
+                                             id
+                                             name
+                                             surname
+                                         }
+                                         director {
+                                             id
+                                             name
+                                             surname
+                                         }
+                                         genres {
+                                             id
+                                             name
+                                         }
+                                         producer {
+                                             id
+                                             name
+                                         }
+                                     }
+                                 }
+                             """;
 
         var response = await GraphQLHelper.ExecuteQueryAsync<FilmsResponse>(_httpClient, query);
 
-        Assert.NotNull(response);
-        Assert.Null(response.Errors);
-        Assert.NotNull(response.Data?.Films);
-        
+        response.ShouldNotBeNull();
+        response.Errors.ShouldBeNull();
+        response.Data.ShouldNotBeNull();
+        response.Data.Films.ShouldNotBeNull();
+
         var film = response.Data.Films.FirstOrDefault();
         if (film != null)
         {
-            Assert.NotNull(film.Actors);
-            Assert.NotNull(film.Director);
-            Assert.NotNull(film.Genres);
-            Assert.NotNull(film.Producer);
+            film.Actors.ShouldNotBeNull();
+            film.Director.ShouldNotBeNull();
+            film.Genres.ShouldNotBeNull();
+            film.Producer.ShouldNotBeNull();
         }
-    }
-
-    private class FilmsResponse
-    {
-        public List<FilmDto> Films { get; set; } = new();
-    }
-
-    private class FilmDto
-    {
-        public string? Id { get; set; }
-        public string? Title { get; set; }
-        public string? Description { get; set; }
-        public string? ReleaseDate { get; set; }
-        public List<ActorDto>? Actors { get; set; }
-        public DirectorDto? Director { get; set; }
-        public List<GenreDto>? Genres { get; set; }
-        public ProducerDto? Producer { get; set; }
-    }
-
-    private class ActorDto
-    {
-        public string? Id { get; set; }
-        public string? Name { get; set; }
-        public string? Surname { get; set; }
-    }
-
-    private class DirectorDto
-    {
-        public string? Id { get; set; }
-        public string? Name { get; set; }
-        public string? Surname { get; set; }
-    }
-
-    private class GenreDto
-    {
-        public string? Id { get; set; }
-        public string? Name { get; set; }
-    }
-
-    private class ProducerDto
-    {
-        public string? Id { get; set; }
-        public string? Name { get; set; }
     }
 }
