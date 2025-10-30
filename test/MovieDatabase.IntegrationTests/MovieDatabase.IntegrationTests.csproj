@@ -31,4 +31,10 @@
     <ProjectReference Include="..\..\src\Api\MovieDatabase.Api\MovieDatabase.Api.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="appsettings.IntegrationTest.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
