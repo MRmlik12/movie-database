@@ -15,15 +15,44 @@ public class AspireAppHostFixture : IAsyncLifetime
     
     public async Task InitializeAsync()
     {
+        // Load configuration and set as environment variables before creating the app host
+        var config = LoadIntegrationTestConfiguration();
+        SetJwtEnvironmentVariables(config);
+        
         var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.MovieDatabase_AppHost>();
-
-        using var stream = GetIntegrationTestConfigStream();
-        appHost.Configuration.AddJsonStream(stream);
         
         _app = await appHost.BuildAsync();
         await _app.StartAsync();
 
         await Task.Delay(TimeSpan.FromSeconds(5));
+    }
+
+    private static IConfigurationRoot LoadIntegrationTestConfiguration()
+    {
+        var configBuilder = new ConfigurationBuilder();
+        using var stream = GetIntegrationTestConfigStream();
+        configBuilder.AddJsonStream(stream);
+        return configBuilder.Build();
+    }
+
+    private static void SetJwtEnvironmentVariables(IConfiguration config)
+    {
+        var jwtKey = config["Jwt:Key"];
+        var jwtIssuer = config["Jwt:Issuer"];
+        var jwtAudience = config["Jwt:Audience"];
+        
+        if (!string.IsNullOrEmpty(jwtKey))
+        {
+            Environment.SetEnvironmentVariable("Jwt__Key", jwtKey);
+        }
+        if (!string.IsNullOrEmpty(jwtIssuer))
+        {
+            Environment.SetEnvironmentVariable("Jwt__Issuer", jwtIssuer);
+        }
+        if (!string.IsNullOrEmpty(jwtAudience))
+        {
+            Environment.SetEnvironmentVariable("Jwt__Audience", jwtAudience);
+        }
     }
 
     private static Stream GetIntegrationTestConfigStream()
