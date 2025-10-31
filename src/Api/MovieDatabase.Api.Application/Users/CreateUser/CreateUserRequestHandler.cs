@@ -1,4 +1,5 @@
-﻿using MovieDatabase.Api.Core.Cqrs;
+﻿using MovieDatabase.Api.Application.Users.Exceptions;
+using MovieDatabase.Api.Core.Cqrs;
 using MovieDatabase.Api.Core.Documents.Users;
 using MovieDatabase.Api.Core.Dtos.Users;
 using MovieDatabase.Api.Core.Services;
@@ -11,6 +12,12 @@ public class CreateUserRequestHandler(IUserRepository userRepository, IJwtServic
 {
     public async Task<UserCredentialsDto> HandleAsync(CreateUserRequest request)
     {
+        var existingUser = await userRepository.GetByEmail(request.Email);
+        if (existingUser != null)
+        {
+            throw new DuplicateEmailApplicationException();
+        }
+
         var user = new User
         {
             Name = request.Username,

@@ -14,7 +14,7 @@ public class DeleteFilmRequestHandler(IFilmRepository filmRepository) : IRequest
         {
             throw new FilmNotExistsApplicationException();
         }
-        
+
         await filmRepository.Delete(film);
 
         return film.Id.ToString();
