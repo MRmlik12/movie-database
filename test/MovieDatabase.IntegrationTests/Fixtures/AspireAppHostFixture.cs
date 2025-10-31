@@ -3,6 +3,8 @@ using Aspire.Hosting.Testing;
 
 using Microsoft.Extensions.Configuration;
 
+using System.Reflection;
+
 namespace MovieDatabase.IntegrationTests.Fixtures;
 
 public class AspireAppHostFixture : IAsyncLifetime
@@ -15,8 +17,8 @@ public class AspireAppHostFixture : IAsyncLifetime
     {
         var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.MovieDatabase_AppHost>();
 
-        var configPath = GetIntegrationTestConfigPath();
-        appHost.Configuration.AddJsonFile(configPath);
+        using var stream = GetIntegrationTestConfigStream();
+        appHost.Configuration.AddJsonStream(stream);
         
         _app = await appHost.BuildAsync();
         await _app.StartAsync();
@@ -24,8 +26,23 @@ public class AspireAppHostFixture : IAsyncLifetime
         await Task.Delay(TimeSpan.FromSeconds(5));
     }
 
-    private static string GetIntegrationTestConfigPath()
-        => Path.Combine(AppContext.BaseDirectory, "appsettings.IntegrationTest.json");
+    private static Stream GetIntegrationTestConfigStream()
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var resourceName = "MovieDatabase.IntegrationTests.appsettings.IntegrationTest.json";
+        
+        var stream = assembly.GetManifestResourceStream(resourceName);
+        
+        if (stream == null)
+        {
+            var availableResources = string.Join(", ", assembly.GetManifestResourceNames());
+            throw new FileNotFoundException(
+                $"Embedded resource '{resourceName}' not found. " +
+                $"Available resources: {availableResources}");
+        }
+        
+        return stream;
+    }
 
     public HttpClient CreateHttpClient(string resourceName)
     {

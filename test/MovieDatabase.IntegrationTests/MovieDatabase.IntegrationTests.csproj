@@ -32,9 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="appsettings.IntegrationTest.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <EmbeddedResource Include="appsettings.IntegrationTest.json" />
   </ItemGroup>
 
 </Project>
