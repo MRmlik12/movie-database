@@ -15,13 +15,17 @@ public class AspireAppHostFixture : IAsyncLifetime
     {
         var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.MovieDatabase_AppHost>();
 
-        appHost.Configuration.AddJsonFile("appsettings.IntegrationTest.json");
+        var configPath = GetIntegrationTestConfigPath();
+        appHost.Configuration.AddJsonFile(configPath);
         
         _app = await appHost.BuildAsync();
         await _app.StartAsync();
 
         await Task.Delay(TimeSpan.FromSeconds(5));
     }
+
+    private static string GetIntegrationTestConfigPath()
+        => Path.Combine(AppContext.BaseDirectory, "appsettings.IntegrationTest.json");
 
     public HttpClient CreateHttpClient(string resourceName)
     {
