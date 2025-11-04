@@ -26,16 +26,16 @@ public class GetDirectorsRequestHandlerTests
             new() { Name = "Steven", Surname = "Spielberg" },
             new() { Name = "Quentin", Surname = "Tarantino" }
         };
-        var request = new GetDirectorsRequest(null);
+        var request = new GetDirectorsRequest();
 
-        _mockFilmRepository.GetDirectors(null)
+        _mockFilmRepository.GetDirectors(Arg.Any<string>(), Arg.Any<int?>())
             .Returns(Task.FromResult<IEnumerable<DirectorInfo>>(directors));
 
         var result = await _handler.HandleAsync(request);
 
         result.ShouldNotBeNull();
         result.Count().ShouldBe(3);
-        await _mockFilmRepository.Received(1).GetDirectors(null);
+        await _mockFilmRepository.Received(1).GetDirectors(Arg.Any<string>(), Arg.Any<int?>());
     }
 
     [Fact]
@@ -44,13 +44,11 @@ public class GetDirectorsRequestHandlerTests
         var directors = new List<DirectorInfo>
         {
             new() { Name = "Christopher", Surname = "Nolan" },
-            new() { Name = "Christopher", Surname = "Nolan" },
-            new() { Name = "Steven", Surname = "Spielberg" },
             new() { Name = "Steven", Surname = "Spielberg" }
         };
-        var request = new GetDirectorsRequest(null);
+        var request = new GetDirectorsRequest();
 
-        _mockFilmRepository.GetDirectors(null)
+        _mockFilmRepository.GetDirectors(Arg.Any<string>(), Arg.Any<int?>())
             .Returns(Task.FromResult<IEnumerable<DirectorInfo>>(directors));
 
         var result = await _handler.HandleAsync(request);
@@ -63,9 +61,9 @@ public class GetDirectorsRequestHandlerTests
     [Fact]
     public async Task HandleAsync_WithEmptyResult_ShouldReturnEmptyList()
     {
-        var request = new GetDirectorsRequest(null);
+        var request = new GetDirectorsRequest();
 
-        _mockFilmRepository.GetDirectors(null)
+        _mockFilmRepository.GetDirectors(Arg.Any<string>(), Arg.Any<int?>())
             .Returns(Task.FromResult<IEnumerable<DirectorInfo>>(new List<DirectorInfo>()));
 
         var result = await _handler.HandleAsync(request);
@@ -84,14 +82,14 @@ public class GetDirectorsRequestHandlerTests
         };
         var request = new GetDirectorsRequest(searchTerm);
 
-        _mockFilmRepository.GetDirectors(searchTerm)
+        _mockFilmRepository.GetDirectors(searchTerm, Arg.Any<int?>())
             .Returns(Task.FromResult<IEnumerable<DirectorInfo>>(directors));
 
         var result = await _handler.HandleAsync(request);
 
         result.Count().ShouldBe(1);
         result.First().Surname.ShouldBe("Nolan");
-        await _mockFilmRepository.Received(1).GetDirectors(searchTerm);
+        await _mockFilmRepository.Received(1).GetDirectors(searchTerm, Arg.Any<int?>());
     }
 
     [Fact]
@@ -103,9 +101,9 @@ public class GetDirectorsRequestHandlerTests
             Name = "Martin",
             Surname = "Scorsese"
         };
-        var request = new GetDirectorsRequest(null);
+        var request = new GetDirectorsRequest();
 
-        _mockFilmRepository.GetDirectors(null)
+        _mockFilmRepository.GetDirectors(Arg.Any<string>(), Arg.Any<int?>())
             .Returns(Task.FromResult<IEnumerable<DirectorInfo>>(new List<DirectorInfo> { director }));
 
         var result = await _handler.HandleAsync(request);

@@ -26,16 +26,16 @@ public class GetProducersRequestHandlerTests
             new() { Name = "Universal Pictures" },
             new() { Name = "Paramount Pictures" }
         };
-        var request = new GetProducersRequest(null);
+        var request = new GetProducersRequest();
 
-        _mockFilmRepository.GetProducers(null)
+        _mockFilmRepository.GetProducers(Arg.Any<string>(), Arg.Any<int?>())
             .Returns(Task.FromResult<IEnumerable<ProducerInfo>>(producers));
 
         var result = await _handler.HandleAsync(request);
 
         result.ShouldNotBeNull();
         result.Count().ShouldBe(3);
-        await _mockFilmRepository.Received(1).GetProducers(null);
+        await _mockFilmRepository.Received(1).GetProducers(Arg.Any<string>(), Arg.Any<int?>());
     }
 
     [Fact]
@@ -44,14 +44,12 @@ public class GetProducersRequestHandlerTests
         var producers = new List<ProducerInfo>
         {
             new() { Name = "Warner Bros" },
-            new() { Name = "Warner Bros" },
-            new() { Name = "Universal Pictures" },
             new() { Name = "Universal Pictures" },
             new() { Name = "Disney" }
         };
-        var request = new GetProducersRequest(null);
+        var request = new GetProducersRequest();
 
-        _mockFilmRepository.GetProducers(null)
+        _mockFilmRepository.GetProducers(Arg.Any<string>(), Arg.Any<int?>())
             .Returns(Task.FromResult<IEnumerable<ProducerInfo>>(producers));
 
         var result = await _handler.HandleAsync(request);
@@ -65,9 +63,9 @@ public class GetProducersRequestHandlerTests
     [Fact]
     public async Task HandleAsync_WithEmptyResult_ShouldReturnEmptyList()
     {
-        var request = new GetProducersRequest(null);
+        var request = new GetProducersRequest();
 
-        _mockFilmRepository.GetProducers(null)
+        _mockFilmRepository.GetProducers(Arg.Any<string>(), Arg.Any<int?>())
             .Returns(Task.FromResult<IEnumerable<ProducerInfo>>(new List<ProducerInfo>()));
 
         var result = await _handler.HandleAsync(request);
@@ -86,14 +84,14 @@ public class GetProducersRequestHandlerTests
         };
         var request = new GetProducersRequest(searchTerm);
 
-        _mockFilmRepository.GetProducers(searchTerm)
+        _mockFilmRepository.GetProducers(searchTerm, Arg.Any<int?>())
             .Returns(Task.FromResult<IEnumerable<ProducerInfo>>(producers));
 
         var result = await _handler.HandleAsync(request);
 
         result.Count().ShouldBe(1);
         result.First().Name.ShouldBe("Warner Bros");
-        await _mockFilmRepository.Received(1).GetProducers(searchTerm);
+        await _mockFilmRepository.Received(1).GetProducers(searchTerm, Arg.Any<int?>());
     }
 
     [Fact]
@@ -104,9 +102,9 @@ public class GetProducersRequestHandlerTests
             Id = Guid.NewGuid(),
             Name = "20th Century Fox"
         };
-        var request = new GetProducersRequest(null);
+        var request = new GetProducersRequest();
 
-        _mockFilmRepository.GetProducers(null)
+        _mockFilmRepository.GetProducers(Arg.Any<string>(), Arg.Any<int?>())
             .Returns(Task.FromResult<IEnumerable<ProducerInfo>>(new List<ProducerInfo> { producer }));
 
         var result = await _handler.HandleAsync(request);

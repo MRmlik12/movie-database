@@ -15,4 +15,8 @@
     <ProjectReference Include="..\MovieDatabase.Api.Infrastructure\MovieDatabase.Api.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Users\Exceptions\" />
+  </ItemGroup>
+
 </Project>

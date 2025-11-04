@@ -1,3 +1,3 @@
-﻿namespace MovieDatabase.Api.Application.Films.Exceptions;
+﻿namespace MovieDatabase.Api.Core.Exceptions.Films;
 
 public class FilmNotExistsApplicationException(string message = "Film not exist in database") : Exception(message);

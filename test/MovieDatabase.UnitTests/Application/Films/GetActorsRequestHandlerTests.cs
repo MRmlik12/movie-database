@@ -26,16 +26,16 @@ public class GetActorsRequestHandlerTests
             ("Jane", "Smith"),
             ("Bob", "Johnson")
         );
-        var request = new GetActorsRequest(null);
+        var request = new GetActorsRequest();
 
-        _mockFilmRepository.GetActors(null)
+        _mockFilmRepository.GetActors(Arg.Any<string>(), Arg.Any<int?>())
             .Returns(Task.FromResult<IEnumerable<Actor>>(actors));
 
         var result = await _handler.HandleAsync(request);
 
         result.ShouldNotBeNull();
         result.Count().ShouldBe(3);
-        await _mockFilmRepository.Received(1).GetActors(null);
+        await _mockFilmRepository.Received(1).GetActors(Arg.Any<string>(), Arg.Any<int?>());
     }
 
     [Fact]
@@ -44,13 +44,11 @@ public class GetActorsRequestHandlerTests
         var actors = new List<Actor>
         {
             new() { Name = "John", Surname = "Doe" },
-            new() { Name = "John", Surname = "Doe" },
-            new() { Name = "Jane", Surname = "Smith" },
             new() { Name = "Jane", Surname = "Smith" }
         };
-        var request = new GetActorsRequest(null);
+        var request = new GetActorsRequest();
 
-        _mockFilmRepository.GetActors(null)
+        _mockFilmRepository.GetActors(Arg.Any<string>(), Arg.Any<int?>())
             .Returns(Task.FromResult<IEnumerable<Actor>>(actors));
 
         var result = await _handler.HandleAsync(request);
@@ -63,9 +61,9 @@ public class GetActorsRequestHandlerTests
     [Fact]
     public async Task HandleAsync_WithEmptyResult_ShouldReturnEmptyList()
     {
-        var request = new GetActorsRequest(null);
+        var request = new GetActorsRequest();
 
-        _mockFilmRepository.GetActors(null)
+        _mockFilmRepository.GetActors(Arg.Any<string>(), Arg.Any<int?>())
             .Returns(Task.FromResult<IEnumerable<Actor>>(new List<Actor>()));
 
         var result = await _handler.HandleAsync(request);

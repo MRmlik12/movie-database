@@ -1,7 +1,7 @@
-﻿using MovieDatabase.Api.Application.Users.Exceptions;
-using MovieDatabase.Api.Core.Cqrs;
+﻿using MovieDatabase.Api.Core.Cqrs;
 using MovieDatabase.Api.Core.Documents.Users;
 using MovieDatabase.Api.Core.Dtos.Users;
+using MovieDatabase.Api.Core.Exceptions.Users;
 using MovieDatabase.Api.Core.Services;
 using MovieDatabase.Api.Core.Utils;
 using MovieDatabase.Api.Infrastructure.Db.Repositories;

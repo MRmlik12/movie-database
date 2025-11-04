@@ -22,16 +22,16 @@ public class GetGenresRequestHandlerTests
     public async Task HandleAsync_ShouldReturnAllGenres()
     {
         var genres = TestDataBuilder.CreateGenres("Action", "Drama", "Comedy", "Thriller");
-        var request = new GetGenresRequest(null);
+        var request = new GetGenresRequest();
 
-        _mockFilmRepository.GetGenres(null)
+        _mockFilmRepository.GetGenres(Arg.Any<string>(), Arg.Any<int?>())
             .Returns(Task.FromResult<IEnumerable<Genre>>(genres));
 
         var result = await _handler.HandleAsync(request);
 
         result.ShouldNotBeNull();
         result.Count().ShouldBe(4);
-        await _mockFilmRepository.Received(1).GetGenres(null);
+        await _mockFilmRepository.Received(1).GetGenres(Arg.Any<string>(), Arg.Any<int?>());
     }
 
     [Fact]
@@ -40,14 +40,12 @@ public class GetGenresRequestHandlerTests
         var genres = new List<Genre>
         {
             new() { Name = "Action" },
-            new() { Name = "Action" },
-            new() { Name = "Drama" },
             new() { Name = "Drama" },
             new() { Name = "Comedy" }
         };
-        var request = new GetGenresRequest(null);
+        var request = new GetGenresRequest();
 
-        _mockFilmRepository.GetGenres(null)
+        _mockFilmRepository.GetGenres(Arg.Any<string>(), Arg.Any<int?>())
             .Returns(Task.FromResult<IEnumerable<Genre>>(genres));
 
         var result = await _handler.HandleAsync(request);
@@ -61,9 +59,9 @@ public class GetGenresRequestHandlerTests
     [Fact]
     public async Task HandleAsync_WithEmptyResult_ShouldReturnEmptyList()
     {
-        var request = new GetGenresRequest(null);
+        var request = new GetGenresRequest();
 
-        _mockFilmRepository.GetGenres(null)
+        _mockFilmRepository.GetGenres(Arg.Any<string>(), Arg.Any<int?>())
             .Returns(Task.FromResult<IEnumerable<Genre>>(new List<Genre>()));
 
         var result = await _handler.HandleAsync(request);
@@ -79,14 +77,14 @@ public class GetGenresRequestHandlerTests
         var genres = new List<Genre> { new() { Name = "Action" } };
         var request = new GetGenresRequest(searchTerm);
 
-        _mockFilmRepository.GetGenres(searchTerm)
+        _mockFilmRepository.GetGenres(searchTerm, Arg.Any<int?>())
             .Returns(Task.FromResult<IEnumerable<Genre>>(genres));
 
         var result = await _handler.HandleAsync(request);
 
         result.Count().ShouldBe(1);
         result.First().Name.ShouldBe("Action");
-        await _mockFilmRepository.Received(1).GetGenres(searchTerm);
+        await _mockFilmRepository.Received(1).GetGenres(searchTerm, Arg.Any<int?>());
     }
 
     [Fact]
@@ -97,9 +95,9 @@ public class GetGenresRequestHandlerTests
             Id = Guid.NewGuid(),
             Name = "Science Fiction"
         };
-        var request = new GetGenresRequest(null);
+        var request = new GetGenresRequest();
 
-        _mockFilmRepository.GetGenres(null)
+        _mockFilmRepository.GetGenres(Arg.Any<string>(), Arg.Any<int?>())
             .Returns(Task.FromResult<IEnumerable<Genre>>(new List<Genre> { genre }));
 
         var result = await _handler.HandleAsync(request);

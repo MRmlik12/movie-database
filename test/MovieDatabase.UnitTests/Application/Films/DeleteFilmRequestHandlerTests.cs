@@ -1,7 +1,7 @@
 using Shouldly;
 using MovieDatabase.Api.Application.Films.DeleteFilm;
-using MovieDatabase.Api.Application.Films.Exceptions;
 using MovieDatabase.Api.Core.Documents.Films;
+using MovieDatabase.Api.Core.Exceptions.Films;
 using MovieDatabase.Api.Infrastructure.Db.Repositories;
 using MovieDatabase.UnitTests.Helpers;
 using NSubstitute;

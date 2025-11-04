@@ -1,5 +1,3 @@
-﻿using MovieDatabase.Api.Core.Exceptions;
-
-namespace MovieDatabase.Api.Application.Films.Exceptions;
+﻿namespace MovieDatabase.Api.Core.Exceptions.Films;
 
 public class FilmExistsApplicationException(string message = "Film with the same title exists") : BaseApplicationException(message);

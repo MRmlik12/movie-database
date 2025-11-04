@@ -1,4 +1,5 @@
 using MovieDatabase.Api.Core.Exceptions;
+using MovieDatabase.Api.Core.Exceptions.Cqrs;
 
 namespace MovieDatabase.Api.Core.Cqrs;
 

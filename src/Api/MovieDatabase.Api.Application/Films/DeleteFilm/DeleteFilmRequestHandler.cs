@@ -1,5 +1,5 @@
-﻿using MovieDatabase.Api.Application.Films.Exceptions;
-using MovieDatabase.Api.Core.Cqrs;
+﻿using MovieDatabase.Api.Core.Cqrs;
+using MovieDatabase.Api.Core.Exceptions.Films;
 using MovieDatabase.Api.Infrastructure.Db.Repositories;
 
 namespace MovieDatabase.Api.Application.Films.DeleteFilm;

@@ -1,6 +1,5 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-
 using MovieDatabase.Api;
 using MovieDatabase.Api.Application;
 using MovieDatabase.Api.Core;
@@ -27,7 +26,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services
     .AddGraphQLServer()
     .AddAuthorization()
-    .AddHttpRequestInterceptor<AppHttpRequestInterceptor>()
+    .RegisterDbContextFactory<AppDbContext>()
     .AddMutationType(d => d.Name("Mutation"))
     .AddTypeExtension<FilmMutations>()
     .AddTypeExtension<UserMutations>()
@@ -35,7 +34,11 @@ builder.Services
 
 var app = builder.Build();
 
-await CosmosInitializer.Initialize(app);
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await dbContext.Database.EnsureCreatedAsync();
+}
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
@@ -46,3 +49,4 @@ app.MapGraphQL();
 app.Run();
 
 public partial class Program { }
+

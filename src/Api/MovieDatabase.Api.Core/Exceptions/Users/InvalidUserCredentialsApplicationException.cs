@@ -1,5 +1,3 @@
-﻿using MovieDatabase.Api.Core.Exceptions;
-
-namespace MovieDatabase.Api.Application.Users.Exceptions;
+﻿namespace MovieDatabase.Api.Core.Exceptions.Users;
 
 public class InvalidUserCredentialsApplicationException(string message = "Wrong user credentials") : BaseApplicationException(message);
