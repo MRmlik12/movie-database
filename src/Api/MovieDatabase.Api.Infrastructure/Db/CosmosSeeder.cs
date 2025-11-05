@@ -1,5 +1,4 @@
-﻿using Microsoft.Azure.Cosmos;
-
+﻿using Microsoft.EntityFrameworkCore;
 using MovieDatabase.Api.Core.Documents.Films;
 using MovieDatabase.Api.Core.Documents.Users;
 using MovieDatabase.Api.Core.Utils;
@@ -10,10 +9,29 @@ namespace MovieDatabase.Api.Infrastructure.Db;
 
 public static class CosmosSeeder
 {
-    public static async Task SeedFilms(Database db, User admin)
+    public static async Task SeedAsync(AppDbContext context)
     {
-        var filmContainer = db.GetContainer(nameof(Film));
+        // Check if data already exists by trying to find the admin user
+        // This uses the partition key (Email) which is more efficient with Cosmos DB
+        var existingAdmin = await context.Users
+            .Where(u => u.Email == "admin@example.com")
+            .FirstOrDefaultAsync();
+            
+        if (existingAdmin != null)
+        {
+            return; // Database is already seeded
+        }
 
+        // Seed users first
+        var users = await SeedUsersAsync(context);
+        
+        // Seed films with admin user
+        var adminUser = users.First(x => x.Role == UserRoles.Administrator);
+        await SeedFilmsAsync(context, adminUser);
+    }
+
+    private static async Task SeedFilmsAsync(AppDbContext context, User admin)
+    {
         var movies = new List<Film>
         {
             new()
@@ -55,19 +73,54 @@ public static class CosmosSeeder
                 ],
                 Description = "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.",
                 CreatorId = admin.Id.ToString()
+            },
+            new()
+            {
+                Title = "The Shawshank Redemption",
+                ReleaseDate = new DateOnly(1994, 9, 23),
+                Director = new DirectorInfo { Name = "Frank", Surname = "Darabont" },
+                Producer = new ProducerInfo { Name = "Niki Marvin" },
+                Actors =
+                [
+                    new Actor { Name = "Tim", Surname = "Robbins" },
+                    new Actor { Name = "Morgan", Surname = "Freeman" }
+                ],
+                Genres =
+                [
+                    new Genre { Name = "Drama" }
+                ],
+                Description = "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
+                CreatorId = admin.Id.ToString()
+            },
+            new()
+            {
+                Title = "The Dark Knight",
+                ReleaseDate = new DateOnly(2008, 7, 18),
+                Director = new DirectorInfo { Name = "Christopher", Surname = "Nolan" },
+                Producer = new ProducerInfo { Name = "Emma Thomas" },
+                Actors =
+                [
+                    new Actor { Name = "Christian", Surname = "Bale" },
+                    new Actor { Name = "Heath", Surname = "Ledger" },
+                    new Actor { Name = "Aaron", Surname = "Eckhart" }
+                ],
+                Genres =
+                [
+                    new Genre { Name = "Action" },
+                    new Genre { Name = "Crime" },
+                    new Genre { Name = "Drama" }
+                ],
+                Description = "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
+                CreatorId = admin.Id.ToString()
             }
         };
 
-        foreach (var movie in movies)
-        {
-            await filmContainer.CreateItemAsync(movie);
-        }
+        await context.Films.AddRangeAsync(movies);
+        await context.SaveChangesAsync();
     }
 
-    public static async Task<List<User>> SeedUsers(Database db)
+    private static async Task<List<User>> SeedUsersAsync(AppDbContext context)
     {
-        var userContainer = db.GetContainer(nameof(User));
-
         var users = new List<User>
         {
             new()
@@ -93,10 +146,8 @@ public static class CosmosSeeder
             }
         };
 
-        foreach (var user in users)
-        {
-            await userContainer.UpsertItemAsync(user);
-        }
+        await context.Users.AddRangeAsync(users);
+        await context.SaveChangesAsync();
 
         return users;
     }
