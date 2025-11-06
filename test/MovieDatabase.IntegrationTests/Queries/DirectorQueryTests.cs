@@ -7,7 +7,7 @@ using Shouldly;
 namespace MovieDatabase.IntegrationTests.Queries;
 
 [Collection("AspireAppHost")]
-public class DirectorQueryTests(AspireAppHostFixture fixture) : IClassFixture<AspireAppHostFixture>
+public class DirectorQueryTests(AspireAppHostFixture fixture)
 {
     private readonly HttpClient _httpClient = fixture.CreateHttpClient("movies-db-api");
 

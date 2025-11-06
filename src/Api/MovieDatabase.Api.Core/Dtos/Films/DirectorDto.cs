@@ -1,7 +1,7 @@
 ﻿using MovieDatabase.Api.Core.Documents.Films;
 using MovieDatabase.Api.Core.Interfaces;
 
-namespace MovieDatabase.Api.Core.Dtos;
+namespace MovieDatabase.Api.Core.Dtos.Films;
 
 public record DirectorDto(string Id, string Name, string Surname) : IFrom<DirectorDto, DirectorInfo>
 {

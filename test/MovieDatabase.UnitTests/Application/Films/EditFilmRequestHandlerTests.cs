@@ -2,6 +2,7 @@ using Shouldly;
 using MovieDatabase.Api.Application.Films.EditFilm;
 using MovieDatabase.Api.Core.Documents.Films;
 using MovieDatabase.Api.Core.Exceptions.Films;
+using MovieDatabase.Api.Infrastructure.Db;
 using MovieDatabase.Api.Infrastructure.Db.Repositories;
 using MovieDatabase.UnitTests.Helpers;
 using NSubstitute;
@@ -11,12 +12,14 @@ namespace MovieDatabase.UnitTests.Application.Films;
 public class EditFilmRequestHandlerTests
 {
     private readonly IFilmRepository _mockFilmRepository;
+    private readonly IUnitOfWork _mockUnitOfWork;
     private readonly EditFilmRequestHandler _handler;
 
     public EditFilmRequestHandlerTests()
     {
         _mockFilmRepository = Substitute.For<IFilmRepository>();
-        _handler = new EditFilmRequestHandler(_mockFilmRepository);
+        _mockUnitOfWork = Substitute.For<IUnitOfWork>();
+        _handler = new EditFilmRequestHandler(_mockFilmRepository, _mockUnitOfWork);
     }
 
     [Fact]
@@ -37,6 +40,7 @@ public class EditFilmRequestHandlerTests
         await _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
             f.Id == filmId &&
             f.Title == request.Title));
+        await _mockUnitOfWork.Received(1).Commit();
     }
 
     [Fact]
@@ -53,6 +57,7 @@ public class EditFilmRequestHandlerTests
         );
 
         await _mockFilmRepository.DidNotReceive().Add(Arg.Any<Film>());
+        await _mockUnitOfWork.DidNotReceive().Commit();
     }
 
     [Fact]
@@ -98,6 +103,7 @@ public class EditFilmRequestHandlerTests
             f.Genres[0].Name == "Action" &&
             f.Director.Name == "New" &&
             f.Producer.Name == "New Producer"));
+        await _mockUnitOfWork.Received(1).Commit();
     }
 
     [Fact]
@@ -115,6 +121,7 @@ public class EditFilmRequestHandlerTests
 
         await _mockFilmRepository.Received(1).Add(Arg.Any<Film>());
         await _mockFilmRepository.Received(1).GetById(filmIdString);
+        await _mockUnitOfWork.Received(1).Commit();
     }
 
     [Fact]
@@ -137,6 +144,7 @@ public class EditFilmRequestHandlerTests
         result.Description.ShouldBe(request.Description);
         result.Actors.Count().ShouldBe(request.Actors.Length);
         result.Genres.Count().ShouldBe(request.Genres.Length);
+        await _mockUnitOfWork.Received(1).Commit();
     }
 
     [Fact]
@@ -178,6 +186,7 @@ public class EditFilmRequestHandlerTests
             f.Genres[0].Id == Guid.Parse(genreId) &&
             f.Director.Id == Guid.Parse(directorId) &&
             f.Producer.Id == Guid.Parse(producerId)));
+        await _mockUnitOfWork.Received(1).Commit();
     }
 
     private static EditFilmRequest CreateValidEditRequest(string filmId)

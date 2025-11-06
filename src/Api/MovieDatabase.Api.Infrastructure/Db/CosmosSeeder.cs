@@ -11,21 +11,14 @@ public static class CosmosSeeder
 {
     public static async Task SeedAsync(AppDbContext context)
     {
-        // Check if data already exists by trying to find the admin user
-        // This uses the partition key (Email) which is more efficient with Cosmos DB
-        var existingAdmin = await context.Users
-            .Where(u => u.Email == "admin@example.com")
-            .FirstOrDefaultAsync();
+        // Workaround for EF Core Cosmos bug: Use Take(1).ToListAsync() instead of AnyAsync()
+        // AnyAsync() generates invalid SQL with "FROM root c" which Cosmos DB cannot resolve
+        var existingUsers = await context.Users.Take(1).ToListAsync();
+        if (existingUsers.Any())
+            return;
             
-        if (existingAdmin != null)
-        {
-            return; // Database is already seeded
-        }
-
-        // Seed users first
         var users = await SeedUsersAsync(context);
         
-        // Seed films with admin user
         var adminUser = users.First(x => x.Role == UserRoles.Administrator);
         await SeedFilmsAsync(context, adminUser);
     }

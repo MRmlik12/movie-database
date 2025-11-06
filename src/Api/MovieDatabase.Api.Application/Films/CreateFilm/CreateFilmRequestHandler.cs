@@ -1,12 +1,14 @@
 ﻿using MovieDatabase.Api.Core.Cqrs;
 using MovieDatabase.Api.Core.Documents.Films;
 using MovieDatabase.Api.Core.Dtos;
+using MovieDatabase.Api.Core.Dtos.Films;
 using MovieDatabase.Api.Core.Exceptions.Films;
+using MovieDatabase.Api.Infrastructure.Db;
 using MovieDatabase.Api.Infrastructure.Db.Repositories;
 
 namespace MovieDatabase.Api.Application.Films.CreateFilm;
 
-public class CreateFilmRequestHandler(IFilmRepository filmRepository) : IRequestHandler<CreateFilmRequest, FilmDto>
+public class CreateFilmRequestHandler(IFilmRepository filmRepository, IUnitOfWork unitOfWork) : IRequestHandler<CreateFilmRequest, FilmDto>
 {
     public async Task<FilmDto> HandleAsync(CreateFilmRequest request)
     {
@@ -45,6 +47,8 @@ public class CreateFilmRequestHandler(IFilmRepository filmRepository) : IRequest
         };
 
         await filmRepository.Add(film);
+
+        await unitOfWork.Commit();
 
         return FilmDto.From(film);
     }

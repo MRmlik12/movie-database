@@ -9,6 +9,7 @@ public class FilmRepository(AppDbContext context) : IFilmRepository
     public async Task Add(Film film)
     {
         context.Films.Add(film);
+        
         await context.SaveChangesAsync();
     }
 
@@ -20,18 +21,21 @@ public class FilmRepository(AppDbContext context) : IFilmRepository
             .Where(f => f.Id == Guid.Parse(id))
             .SingleOrDefaultAsync();
 
-    public async Task Delete(Film film)
+    public Task Delete(Film film)
     {
         film.IsDeleted = true;
         context.Films.Update(film);
-        await context.SaveChangesAsync();
+        
+        return Task.CompletedTask;
     }
 
-    public async Task Update(Film film)
+    public Task Update(Film film)
     {
         film.UpdatedAt = DateTime.UtcNow;
+        
         context.Films.Update(film);
-        await context.SaveChangesAsync();
+
+        return Task.CompletedTask;
     }
 }
 

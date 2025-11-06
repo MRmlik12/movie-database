@@ -14,9 +14,13 @@ namespace MovieDatabase.Api.Infrastructure;
 public static class InfrastructureExtensions
 {
     public static void AddInfrastructureDefaults(this IServiceCollection services, IConfiguration configuration)
-        => services.AddRepositories()
+        => services.AddUnitOfWork()
+            .AddRepositories()
             .AddJwtAuthenticationDefaults(configuration);
 
+    private static IServiceCollection AddUnitOfWork(this IServiceCollection services)
+        => services.AddScoped<IUnitOfWork, UnitOfWork>();
+    
     private static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         services.AddScoped<IFilmRepository, FilmRepository>();

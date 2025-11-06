@@ -1,10 +1,11 @@
 ﻿using MovieDatabase.Api.Core.Cqrs;
 using MovieDatabase.Api.Core.Exceptions.Films;
+using MovieDatabase.Api.Infrastructure.Db;
 using MovieDatabase.Api.Infrastructure.Db.Repositories;
 
 namespace MovieDatabase.Api.Application.Films.DeleteFilm;
 
-public class DeleteFilmRequestHandler(IFilmRepository filmRepository) : IRequestHandler<DeleteFilmRequest, string>
+public class DeleteFilmRequestHandler(IFilmRepository filmRepository, IUnitOfWork unitOfWork) : IRequestHandler<DeleteFilmRequest, string>
 {
     public async Task<string> HandleAsync(DeleteFilmRequest request)
     {
@@ -16,6 +17,8 @@ public class DeleteFilmRequestHandler(IFilmRepository filmRepository) : IRequest
         }
 
         await filmRepository.Delete(film);
+
+        await unitOfWork.Commit();
 
         return film.Id.ToString();
     }

@@ -9,7 +9,7 @@ using Shouldly;
 namespace MovieDatabase.IntegrationTests.Mutations;
 
 [Collection("AspireAppHost")]
-public class UserMutationTests(AspireAppHostFixture fixture) : IClassFixture<AspireAppHostFixture>
+public class UserMutationTests(AspireAppHostFixture fixture)
 {
     private readonly HttpClient _httpClient = fixture.CreateHttpClient("movies-db-api");
 

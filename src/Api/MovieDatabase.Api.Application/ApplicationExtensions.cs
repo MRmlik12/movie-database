@@ -7,6 +7,7 @@ using MovieDatabase.Api.Application.Users.AuthenticateUser;
 using MovieDatabase.Api.Application.Users.CreateUser;
 using MovieDatabase.Api.Core.Cqrs;
 using MovieDatabase.Api.Core.Dtos;
+using MovieDatabase.Api.Core.Dtos.Films;
 using MovieDatabase.Api.Core.Dtos.Users;
 
 namespace MovieDatabase.Api.Application;

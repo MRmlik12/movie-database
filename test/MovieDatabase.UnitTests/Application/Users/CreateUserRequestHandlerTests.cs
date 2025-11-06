@@ -3,6 +3,7 @@ using MovieDatabase.Api.Application.Users.CreateUser;
 using MovieDatabase.Api.Core.Documents.Users;
 using MovieDatabase.Api.Core.Exceptions.Users;
 using MovieDatabase.Api.Core.Services;
+using MovieDatabase.Api.Infrastructure.Db;
 using MovieDatabase.Api.Infrastructure.Db.Repositories;
 using MovieDatabase.UnitTests.Helpers;
 using NSubstitute;
@@ -12,14 +13,16 @@ namespace MovieDatabase.UnitTests.Application.Users;
 public class CreateUserRequestHandlerTests
 {
     private readonly IUserRepository _mockUserRepository;
+    private readonly IUnitOfWork _mockUnitOfWork;
     private readonly IJwtService _mockJwtService;
     private readonly CreateUserRequestHandler _handler;
 
     public CreateUserRequestHandlerTests()
     {
         _mockUserRepository = Substitute.For<IUserRepository>();
+        _mockUnitOfWork = Substitute.For<IUnitOfWork>();
         _mockJwtService = Substitute.For<IJwtService>();
-        _handler = new CreateUserRequestHandler(_mockUserRepository, _mockJwtService);
+        _handler = new CreateUserRequestHandler(_mockUserRepository, _mockUnitOfWork, _mockJwtService);
     }
 
     [Fact]
@@ -37,6 +40,7 @@ public class CreateUserRequestHandlerTests
         await _mockUserRepository.Received(1).Add(Arg.Is<User>(u => 
             u.Name == request.Username && 
             u.Email == request.Email));
+        await _mockUnitOfWork.Received(1).Commit();
     }
 
     [Fact]
@@ -59,6 +63,7 @@ public class CreateUserRequestHandlerTests
         result.Username.ShouldBe(request.Username);
         result.Email.ShouldBe(request.Email);
         result.Role.ShouldBe(nameof(UserRoles.User));
+        await _mockUnitOfWork.Received(1).Commit();
     }
 
     [Fact]
@@ -75,6 +80,7 @@ public class CreateUserRequestHandlerTests
         );
 
         await _mockUserRepository.DidNotReceive().Add(Arg.Any<User>());
+        await _mockUnitOfWork.DidNotReceive().Commit();
     }
 
     [Fact]
@@ -93,6 +99,7 @@ public class CreateUserRequestHandlerTests
         await _mockUserRepository.Received(1).Add(Arg.Is<User>(u =>
             u.PasswordHash != plainPassword &&
             u.PasswordHash.StartsWith("$2")));
+        await _mockUnitOfWork.Received(1).Commit();
     }
 
     [Fact]
@@ -110,6 +117,7 @@ public class CreateUserRequestHandlerTests
         result.Role.ShouldBe(nameof(UserRoles.User));
         await _mockUserRepository.Received(1).Add(Arg.Is<User>(u => 
             u.Role == UserRoles.User));
+        await _mockUnitOfWork.Received(1).Commit();
     }
 
     [Fact]
@@ -126,6 +134,7 @@ public class CreateUserRequestHandlerTests
 
         await _mockUserRepository.Received(1).Add(Arg.Any<User>());
         await _mockUserRepository.Received(1).GetByEmail(request.Email);
+        await _mockUnitOfWork.Received(1).Commit();
     }
 
     [Fact]
@@ -144,6 +153,7 @@ public class CreateUserRequestHandlerTests
             u.Name == request.Username &&
             u.Email == request.Email &&
             u.Role == UserRoles.User));
+        await _mockUnitOfWork.Received(1).Commit();
     }
 
     [Theory]
@@ -163,6 +173,7 @@ public class CreateUserRequestHandlerTests
 
         result.ShouldNotBeNull();
         result.Email.ShouldBe(email);
+        await _mockUnitOfWork.Received(1).Commit();
     }
 }
 

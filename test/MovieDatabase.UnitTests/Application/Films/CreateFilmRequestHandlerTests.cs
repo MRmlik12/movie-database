@@ -2,6 +2,7 @@ using Shouldly;
 using MovieDatabase.Api.Application.Films.CreateFilm;
 using MovieDatabase.Api.Core.Documents.Films;
 using MovieDatabase.Api.Core.Exceptions.Films;
+using MovieDatabase.Api.Infrastructure.Db;
 using MovieDatabase.Api.Infrastructure.Db.Repositories;
 using MovieDatabase.UnitTests.Helpers;
 using NSubstitute;
@@ -11,12 +12,14 @@ namespace MovieDatabase.UnitTests.Application.Films;
 public class CreateFilmRequestHandlerTests
 {
     private readonly IFilmRepository _mockFilmRepository;
+    private readonly IUnitOfWork _mockUnitOfWork;
     private readonly CreateFilmRequestHandler _handler;
 
     public CreateFilmRequestHandlerTests()
     {
         _mockFilmRepository = Substitute.For<IFilmRepository>();
-        _handler = new CreateFilmRequestHandler(_mockFilmRepository);
+        _mockUnitOfWork = Substitute.For<IUnitOfWork>();
+        _handler = new CreateFilmRequestHandler(_mockFilmRepository, _mockUnitOfWork);
     }
 
     [Fact]
@@ -32,6 +35,7 @@ public class CreateFilmRequestHandlerTests
         await _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
             f.Title == request.Title &&
             f.ReleaseDate == request.ReleaseDate));
+        await _mockUnitOfWork.Received(1).Commit();
     }
 
     [Fact]
@@ -51,6 +55,7 @@ public class CreateFilmRequestHandlerTests
         result.Genres.Length.ShouldBe(request.Genres.Length);
         result.Director.ShouldNotBeNull();
         result.Producer.ShouldNotBeNull();
+        await _mockUnitOfWork.Received(1).Commit();
     }
 
     [Fact]
@@ -67,6 +72,7 @@ public class CreateFilmRequestHandlerTests
         );
 
         await _mockFilmRepository.DidNotReceive().Add(Arg.Any<Film>());
+        await _mockUnitOfWork.DidNotReceive().Commit();
     }
 
     [Fact]
@@ -91,6 +97,7 @@ public class CreateFilmRequestHandlerTests
             f.Title == "Test Film" &&
             !f.Title.StartsWith(" ") &&
             !f.Title.EndsWith(" ")));
+        await _mockUnitOfWork.Received(1).Commit();
     }
 
     [Fact]
@@ -106,6 +113,7 @@ public class CreateFilmRequestHandlerTests
             f.Description == "Test Description" &&
             !f.Description.StartsWith(" ") &&
             !f.Description.EndsWith(" ")));
+        await _mockUnitOfWork.Received(1).Commit();
     }
 
     [Fact]
@@ -119,6 +127,7 @@ public class CreateFilmRequestHandlerTests
 
         await _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
             f.Description == string.Empty));
+        await _mockUnitOfWork.Received(1).Commit();
     }
 
     [Fact]
@@ -149,6 +158,7 @@ public class CreateFilmRequestHandlerTests
             f.Actors[0].Surname == "Doe" &&
             f.Actors[1].Name == "Jane" &&
             f.Actors[1].Surname == "Smith"));
+        await _mockUnitOfWork.Received(1).Commit();
     }
 
     [Fact]
@@ -177,6 +187,7 @@ public class CreateFilmRequestHandlerTests
             f.Genres.Count == 2 &&
             f.Genres[0].Name == "Drama" &&
             f.Genres[1].Name == "Thriller"));
+        await _mockUnitOfWork.Received(1).Commit();
     }
 
     [Fact]
@@ -191,6 +202,7 @@ public class CreateFilmRequestHandlerTests
         await _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
             f.Director.Name == request.Director.Name &&
             f.Director.Surname == request.Director.Surname));
+        await _mockUnitOfWork.Received(1).Commit();
     }
 
     [Fact]
@@ -204,6 +216,7 @@ public class CreateFilmRequestHandlerTests
 
         await _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
             f.Producer.Name == request.Producer.Name));
+        await _mockUnitOfWork.Received(1).Commit();
     }
 
     [Fact]
@@ -218,6 +231,7 @@ public class CreateFilmRequestHandlerTests
 
         await _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
             f.CreatorId == creatorId));
+        await _mockUnitOfWork.Received(1).Commit();
     }
 
     [Fact]
@@ -231,6 +245,7 @@ public class CreateFilmRequestHandlerTests
 
         await _mockFilmRepository.Received(1).Add(Arg.Any<Film>());
         await _mockFilmRepository.Received(1).GetByTitle(Arg.Any<string>());
+        await _mockUnitOfWork.Received(1).Commit();
     }
 
     [Theory]
@@ -247,6 +262,7 @@ public class CreateFilmRequestHandlerTests
 
         result.ShouldNotBeNull();
         result.Title.ShouldBe(title);
+        await _mockUnitOfWork.Received(1).Commit();
     }
 
     [Fact]
@@ -263,6 +279,7 @@ public class CreateFilmRequestHandlerTests
 
         result.ShouldNotBeNull();
         result.Actors.ShouldBeEmpty();
+        await _mockUnitOfWork.Received(1).Commit();
     }
 
     private static CreateFilmRequest CreateValidRequest()
