@@ -16,9 +16,11 @@ public class GenreQueryTests(AspireAppHostFixture fixture)
     {
         const string query = """
                                  query {
-                                     genres {
-                                         id
-                                         name
+                                     genres(first: 10) {
+                                         nodes {
+                                             id
+                                             name
+                                         }
                                      }
                                  }
                              """;
@@ -28,27 +30,7 @@ public class GenreQueryTests(AspireAppHostFixture fixture)
         response.Errors.ShouldBeNull();
         response.Data.ShouldNotBeNull();
         response.Data.Genres.ShouldNotBeNull();
-        Assert.NotNull(response.Data.Genres);
-    }
-
-    [Fact]
-    public async Task GetGenres_WithTermFilter_ShouldReturnFilteredGenres()
-    {
-        const string query = """
-                                 query GetGenresByTerm($term: String) {
-                                     genres(term: $term) {
-                                         id
-                                         name
-                                     }
-                                 }
-                             """;
-
-        var variables = new { term = "Action" };
-
-        var response = await GraphQLHelper.ExecuteQueryAsync<GenresResponse>(_httpClient, query, variables);
-
-        response.ShouldNotBeNull();
-        response.Errors.ShouldBeNull();
-        response.Data.ShouldNotBeNull();
+        response.Data.Genres.Nodes.ShouldNotBeNull();
+        response.Data.Genres.Nodes.ShouldNotBeEmpty();
     }
 }

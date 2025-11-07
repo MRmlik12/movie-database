@@ -1,9 +1,17 @@
-﻿using MovieDatabase.Api.Core.Dtos;
-using MovieDatabase.Api.Core.Dtos.Films;
-
-namespace MovieDatabase.IntegrationTests.Responses.Producers;
+﻿﻿namespace MovieDatabase.IntegrationTests.Responses.Producers;
 
 public class ProducersResponse
 {
-    public List<ProducerDto> Producers { get; set; } = new();
+    public ProducersConnection Producers { get; set; } = new();
+}
+
+public class ProducersConnection
+{
+    public List<ProducerQueryDto> Nodes { get; set; } = new();
+}
+
+public class ProducerQueryDto
+{
+    public string? Id { get; set; }
+    public string? Name { get; set; }
 }

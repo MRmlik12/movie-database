@@ -1,9 +1,18 @@
-﻿using MovieDatabase.Api.Core.Dtos;
-using MovieDatabase.Api.Core.Dtos.Films;
-
-namespace MovieDatabase.IntegrationTests.Responses.Directors;
+﻿﻿namespace MovieDatabase.IntegrationTests.Responses.Directors;
 
 public class DirectorsResponse
 {
-    public List<DirectorDto> Directors { get; set; } = new();
+    public DirectorsConnection Directors { get; set; } = new();
+}
+
+public class DirectorsConnection
+{
+    public List<DirectorQueryDto> Nodes { get; set; } = new();
+}
+
+public class DirectorQueryDto
+{
+    public string? Id { get; set; }
+    public string? Name { get; set; }
+    public string? Surname { get; set; }
 }

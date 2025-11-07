@@ -1,11 +1,24 @@
-﻿using MovieDatabase.Api.Core.Dtos;
-using MovieDatabase.Api.Core.Dtos.Films;
+﻿﻿using MovieDatabase.Api.Core.Dtos.Films;
 
 namespace MovieDatabase.IntegrationTests.Responses.Films;
 
 public class FilmsResponse
 {
-    public List<FilmQueryDto> Films { get; set; } = new();
+    public FilmsConnection Films { get; set; } = new();
+}
+
+public class FilmsConnection
+{
+    public List<FilmQueryDto> Nodes { get; set; } = new();
+    public PageInfo? PageInfo { get; set; }
+}
+
+public class PageInfo
+{
+    public bool HasNextPage { get; set; }
+    public bool HasPreviousPage { get; set; }
+    public string? StartCursor { get; set; }
+    public string? EndCursor { get; set; }
 }
 
 // Wrapper for GraphQL response that matches the query structure

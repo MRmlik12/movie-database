@@ -15,8 +15,6 @@ public static class CosmosSeeder
         // AnyAsync() generates invalid SQL with "FROM root c" which Cosmos DB cannot resolve
         var existingUsers = await context.Users.Take(1).ToListAsync();
         if (existingUsers.Any())
-            return;
-            
         var users = await SeedUsersAsync(context);
         
         var adminUser = users.First(x => x.Role == UserRoles.Administrator);
