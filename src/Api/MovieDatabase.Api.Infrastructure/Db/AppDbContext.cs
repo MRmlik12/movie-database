@@ -19,16 +19,33 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.HasPartitionKey(f => f.Title);
             entity.HasKey(f => f.Id);
             
-            entity.OwnsOne(f => f.Director);
-            entity.OwnsOne(f => f.Producer);
-            entity.OwnsMany(f => f.Actors);
-            entity.OwnsMany(f => f.Genres);
+            entity.OwnsOne(f => f.Director, director =>
+            {
+                director.HasKey(d => d.Id);
+            });
+            
+            entity.OwnsOne(f => f.Producer, producer =>
+            {
+                producer.HasKey(p => p.Id);
+            });
+            
+            entity.OwnsMany(f => f.Actors, actor =>
+            {
+                actor.HasKey(a => a.Id);
+            });
+            
+            entity.OwnsMany(f => f.Genres, genre =>
+            {
+                genre.HasKey(g => g.Id);
+            });
             
             entity.Property(f => f.Id).ToJsonProperty("id");
             entity.Property(f => f.Title).IsRequired();
             entity.Property(f => f.ReleaseDate).HasConversion(
                 v => v.ToDateTime(TimeOnly.MinValue),
                 v => DateOnly.FromDateTime(v));
+
+            entity.HasQueryFilter(f => !f.IsDeleted);
         });
 
         modelBuilder.Entity<User>(entity =>
@@ -40,7 +57,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.Property(u => u.Id).ToJsonProperty("id");
             entity.Property(u => u.Email).IsRequired();
             entity.Property(u => u.PasswordHash).IsRequired();
+            
+            entity.HasQueryFilter(f => !f.IsDeleted);
         });
     }
 }
-

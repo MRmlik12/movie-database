@@ -7,15 +7,6 @@ using MovieDatabase.Api.Mutations;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// builder.AddAzureCosmosClient(connectionName: "movies-database-cosmos", configureClientOptions: opt =>
-// {
-//     opt.UseSystemTextJsonSerializerWithOptions = new JsonSerializerOptions
-//     {
-//         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-//         PreferredObjectCreationHandling = JsonObjectCreationHandling.Populate,
-//         Converters = { new JsonStringEnumConverter() }
-//     };
-// });
 builder.AddCosmosDbContext<AppDbContext>("movies-database-cosmos", databaseName: "Movies");
 
 builder.Services.AddApplicationDefaults();
@@ -30,9 +21,15 @@ builder.Services
     .AddFiltering()
     .AddSorting()
     .AddPagingArguments()
+    .ModifyPagingOptions(opt =>
+    {
+        opt.MaxPageSize = 20;
+        opt.DefaultPageSize = 20;
+    })
     .AddTypeExtension<FilmMutations>()
     .AddTypeExtension<UserMutations>()
     .AddQueryType<Query>();
+
 
 var app = builder.Build();
 

@@ -1,5 +1,4 @@
-﻿using MovieDatabase.Api.Core.Dtos;
-using MovieDatabase.Api.Core.Dtos.Films;
+﻿using MovieDatabase.Api.Core.Dtos.Films;
 
 namespace MovieDatabase.IntegrationTests.Responses.Films;
 
