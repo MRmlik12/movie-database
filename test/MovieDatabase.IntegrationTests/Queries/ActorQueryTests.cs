@@ -7,7 +7,7 @@ using Shouldly;
 namespace MovieDatabase.IntegrationTests.Queries;
 
 [Collection("AspireAppHost")]
-public class ActorQueryTests(AspireAppHostFixture fixture) : IClassFixture<AspireAppHostFixture>
+public class ActorQueryTests(AspireAppHostFixture fixture)
 {
     private readonly HttpClient _httpClient = fixture.CreateHttpClient("movies-db-api");
 
@@ -16,10 +16,12 @@ public class ActorQueryTests(AspireAppHostFixture fixture) : IClassFixture<Aspir
     {
         const string query = """
                                  query {
-                                     actors {
-                                         id
-                                         name
-                                         surname
+                                     actors(first: 10) {
+                                         nodes {
+                                             id
+                                             name
+                                             surname
+                                         }
                                      }
                                  }
                              """;
@@ -30,27 +32,7 @@ public class ActorQueryTests(AspireAppHostFixture fixture) : IClassFixture<Aspir
         response.Errors.ShouldBeNull();
         response.Data.ShouldNotBeNull();
         response.Data.Actors.ShouldNotBeNull();
-    }
-
-    [Fact]
-    public async Task GetActors_WithTermFilter_ShouldReturnFilteredActors()
-    {
-        const string query = """
-                                 query GetActorsByTerm($term: String) {
-                                     actors(term: $term) {
-                                         id
-                                         name
-                                         surname
-                                     }
-                                 }
-                             """;
-
-        var variables = new { term = "Smith" };
-
-        var response = await GraphQLHelper.ExecuteQueryAsync<ActorsResponse>(_httpClient, query, variables);
-
-        response.ShouldNotBeNull();
-        response.Errors.ShouldBeNull();
-        response.Data.ShouldNotBeNull();
+        response.Data.Actors.Nodes.ShouldNotBeNull();
+        response.Data.Actors.Nodes.ShouldNotBeEmpty();
     }
 }

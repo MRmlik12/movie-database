@@ -1,57 +1,52 @@
-using MovieDatabase.Api.Application.Films.GetActors;
-using MovieDatabase.Api.Application.Films.GetDirectors;
-using MovieDatabase.Api.Application.Films.GetFilms;
-using MovieDatabase.Api.Application.Films.GetGenres;
-using MovieDatabase.Api.Application.Films.GetProducers;
-using MovieDatabase.Api.Core.Cqrs;
-using MovieDatabase.Api.Core.Dtos;
+using Microsoft.EntityFrameworkCore;
+
+using MovieDatabase.Api.Core.Documents.Films;
+using MovieDatabase.Api.Infrastructure.Db;
 
 namespace MovieDatabase.Api;
 
 public class Query
 {
-    public async Task<IEnumerable<FilmDto>> GetFilms([Service] IDispatcher dispatcher, string? title = null)
-    {
-        var request = new GetFilmsRequest(title);
+    private static IQueryable<Film> BaseQuery(AppDbContext dbContext)
+        => dbContext.Films
+            .AsNoTracking();
 
-        var result = await dispatcher.Dispatch(request);
+    [UsePaging]
+    [UseFiltering]
+    [UseSorting]
+    public IQueryable<Film> Films(
+        [Service] AppDbContext dbContext)
+        => BaseQuery(dbContext);
+    
+    [UsePaging]
+    [UseFiltering]
+    [UseSorting]
+    public IQueryable<Actor> Actors(
+        [Service] AppDbContext dbContext)
+        => BaseQuery(dbContext)
+            .SelectMany(f => f.Actors);
+    
+    [UsePaging]
+    [UseFiltering]
+    [UseSorting]
+    public IQueryable<Genre> Genres(
+        [Service] AppDbContext dbContext)
+        => BaseQuery(dbContext)
+            .SelectMany(f => f.Genres);
+    
+    [UsePaging]
+    [UseFiltering]
+    [UseSorting]
+    public IQueryable<DirectorInfo> Directors(
+        [Service] AppDbContext dbContext)
+        => BaseQuery(dbContext) 
+            .Select(f => f.Director);
 
-        return result;
-    }
-
-    public async Task<IEnumerable<ActorDto>> GetActors([Service] IDispatcher dispatcher, string? term)
-    {
-        var request = new GetActorsRequest(term);
-
-        var result = await dispatcher.Dispatch(request);
-
-        return result;
-    }
-
-    public async Task<IEnumerable<GenreDto>> GetGenres([Service] IDispatcher dispatcher, string? term)
-    {
-        var request = new GetGenresRequest(term);
-
-        var result = await dispatcher.Dispatch(request);
-
-        return result;
-    }
-
-    public async Task<IEnumerable<DirectorDto>> GetDirectors([Service] IDispatcher dispatcher, string? term)
-    {
-        var request = new GetDirectorsRequest(term);
-
-        var result = await dispatcher.Dispatch(request);
-
-        return result;
-    }
-
-    public async Task<IEnumerable<ProducerDto>> GetProducers([Service] IDispatcher dispatcher, string? term)
-    {
-        var request = new GetProducersRequest(term);
-
-        var result = await dispatcher.Dispatch(request);
-
-        return result;
-    }
+    [UsePaging]
+    [UseFiltering]
+    [UseSorting]
+    public IQueryable<ProducerInfo> Producers(
+        [Service] AppDbContext dbContext)
+        => BaseQuery(dbContext)
+            .Select(f => f.Producer);
 }

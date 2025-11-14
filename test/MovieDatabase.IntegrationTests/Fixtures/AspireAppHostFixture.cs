@@ -4,6 +4,7 @@ using Aspire.Hosting.Testing;
 using Microsoft.Extensions.Configuration;
 
 using System.Reflection;
+using System.Diagnostics;
 
 namespace MovieDatabase.IntegrationTests.Fixtures;
 
@@ -24,7 +25,91 @@ public class AspireAppHostFixture : IAsyncLifetime
         _app = await appHost.BuildAsync();
         await _app.StartAsync();
 
-        await Task.Delay(TimeSpan.FromSeconds(5));
+        // Wait for services to be ready
+        await WaitForServicesAsync();
+    }
+
+    private async Task WaitForServicesAsync()
+    {
+        var stopwatch = Stopwatch.StartNew();
+        Console.WriteLine("=== Starting Aspire Services Initialization ===");
+        Console.WriteLine("Waiting for Cosmos DB emulator and API to start...");
+        Console.WriteLine("Note: First run may take 60-90 seconds for Cosmos DB emulator initialization.");
+        
+        // Give significant time for Cosmos DB emulator to start (it can take 30-60 seconds on first run)
+        var initialWaitSeconds = 60;
+        Console.WriteLine($"Initial wait: {initialWaitSeconds} seconds...");
+        await Task.Delay(TimeSpan.FromSeconds(initialWaitSeconds));
+        
+        Console.WriteLine($"Initial wait complete after {stopwatch.Elapsed.TotalSeconds:F1}s. Starting health check polling...");
+        
+        // Try to ping the API to ensure it's ready
+        HttpClient? client = null;
+        try
+        {
+            client = CreateHttpClient("movies-db-api");
+            client.Timeout = TimeSpan.FromSeconds(30);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to create HTTP client: {ex.Message}");
+            throw;
+        }
+        
+        var maxRetries = 60; // 60 retries * 5 seconds = 300 seconds (5 minutes) total
+        var retryCount = 0;
+        var retryDelaySeconds = 5;
+        
+        while (retryCount < maxRetries)
+        {
+            try
+            {
+                Console.WriteLine($"Health check attempt {retryCount + 1}/{maxRetries} (elapsed: {stopwatch.Elapsed.TotalSeconds:F1}s)...");
+                var response = await client.GetAsync("/graphql?sdl");
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"✓ API is ready after {stopwatch.Elapsed.TotalSeconds:F1}s!");
+                    Console.WriteLine("Allowing extra time for database seeding to complete...");
+                    
+                    // Additional delay to ensure seeding is complete
+                    await Task.Delay(TimeSpan.FromSeconds(5));
+                    
+                    stopwatch.Stop();
+                    Console.WriteLine($"=== Initialization complete in {stopwatch.Elapsed.TotalSeconds:F1}s ===");
+                    return;
+                }
+                else
+                {
+                    Console.WriteLine($"  API returned status: {response.StatusCode}");
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"  Connection error: {ex.Message}");
+            }
+            catch (TaskCanceledException)
+            {
+                Console.WriteLine($"  Request timed out after {client.Timeout.TotalSeconds}s");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"  Unexpected error: {ex.GetType().Name} - {ex.Message}");
+            }
+            
+            if (retryCount < maxRetries - 1)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(retryDelaySeconds));
+            }
+            retryCount++;
+        }
+        
+        stopwatch.Stop();
+        var totalWaitTime = initialWaitSeconds + (maxRetries * retryDelaySeconds);
+        throw new TimeoutException(
+            $"API failed to become ready within {totalWaitTime} seconds ({stopwatch.Elapsed.TotalMinutes:F1} minutes). " +
+            "The Cosmos DB emulator may need more time to start, or there may be an issue with the API startup. " +
+            "Check the Aspire dashboard logs for more details.");
     }
 
     private static IConfigurationRoot LoadIntegrationTestConfiguration()

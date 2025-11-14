@@ -1,14 +1,19 @@
-﻿using MovieDatabase.Api.Application.Users.Exceptions;
-using MovieDatabase.Api.Core.Cqrs;
+﻿using MovieDatabase.Api.Core.Cqrs;
 using MovieDatabase.Api.Core.Documents.Users;
 using MovieDatabase.Api.Core.Dtos.Users;
+using MovieDatabase.Api.Core.Exceptions.Users;
 using MovieDatabase.Api.Core.Services;
 using MovieDatabase.Api.Core.Utils;
+using MovieDatabase.Api.Infrastructure.Db;
 using MovieDatabase.Api.Infrastructure.Db.Repositories;
 
 namespace MovieDatabase.Api.Application.Users.CreateUser;
 
-public class CreateUserRequestHandler(IUserRepository userRepository, IJwtService jwtService) : IRequestHandler<CreateUserRequest, UserCredentialsDto>
+public class CreateUserRequestHandler(
+    IUserRepository userRepository,
+    IUnitOfWork unitOfWork,
+    IJwtService jwtService
+) : IRequestHandler<CreateUserRequest, UserCredentialsDto>
 {
     public async Task<UserCredentialsDto> HandleAsync(CreateUserRequest request)
     {
@@ -34,6 +39,8 @@ public class CreateUserRequestHandler(IUserRepository userRepository, IJwtServic
 
         userDto.Token = token;
         userDto.ExpireTime = expireDate;
+
+        await unitOfWork.Commit();
 
         return userDto;
     }

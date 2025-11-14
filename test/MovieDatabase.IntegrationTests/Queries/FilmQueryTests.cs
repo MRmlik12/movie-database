@@ -7,7 +7,7 @@ using Shouldly;
 namespace MovieDatabase.IntegrationTests.Queries;
 
 [Collection("AspireAppHost")]
-public class FilmQueryTests(AspireAppHostFixture fixture) : IClassFixture<AspireAppHostFixture>
+public class FilmQueryTests(AspireAppHostFixture fixture)
 {
     private readonly HttpClient _httpClient = fixture.CreateHttpClient("movies-db-api");
 
@@ -16,11 +16,13 @@ public class FilmQueryTests(AspireAppHostFixture fixture) : IClassFixture<Aspire
     {
         const string query = """
                                  query {
-                                     films {
-                                         id
-                                         title
-                                         description
-                                         releaseDate
+                                     films(first: 10) {
+                                         nodes {
+                                             id
+                                             title
+                                             description
+                                             releaseDate
+                                         }
                                      }
                                  }
                              """;
@@ -31,29 +33,8 @@ public class FilmQueryTests(AspireAppHostFixture fixture) : IClassFixture<Aspire
         response.Errors.ShouldBeNull();
         response.Data.ShouldNotBeNull();
         response.Data.Films.ShouldNotBeNull();
-        response.Data.Films.ShouldNotBeEmpty();
-    }
-
-    [Fact]
-    public async Task GetFilms_WithTitleFilter_ShouldReturnFilteredFilms()
-    {
-        const string query = """
-                                 query GetFilmsByTitle($title: String) {
-                                     films(title: $title) {
-                                         id
-                                         title
-                                         releaseDate
-                                     }
-                                 }
-                             """;
-
-        var variables = new { title = "Test" };
-
-        var response = await GraphQLHelper.ExecuteQueryAsync<FilmsResponse>(_httpClient, query, variables);
-
-        response.ShouldNotBeNull();
-        response.Errors.ShouldBeNull();
-        response.Data.ShouldNotBeNull();
+        response.Data.Films.Nodes.ShouldNotBeNull();
+        response.Data.Films.Nodes.ShouldNotBeEmpty();
     }
 
     [Fact]
@@ -61,26 +42,28 @@ public class FilmQueryTests(AspireAppHostFixture fixture) : IClassFixture<Aspire
     {
         const string query = """
                                  query {
-                                     films {
-                                         id
-                                         title
-                                         actors {
+                                     films(first: 10) {
+                                         nodes {
                                              id
-                                             name
-                                             surname
-                                         }
-                                         director {
-                                             id
-                                             name
-                                             surname
-                                         }
-                                         genres {
-                                             id
-                                             name
-                                         }
-                                         producer {
-                                             id
-                                             name
+                                             title
+                                             actors {
+                                                 id
+                                                 name
+                                                 surname
+                                             }
+                                             director {
+                                                 id
+                                                 name
+                                                 surname
+                                             }
+                                             genres {
+                                                 id
+                                                 name
+                                             }
+                                             producer {
+                                                 id
+                                                 name
+                                             }
                                          }
                                      }
                                  }
@@ -92,8 +75,9 @@ public class FilmQueryTests(AspireAppHostFixture fixture) : IClassFixture<Aspire
         response.Errors.ShouldBeNull();
         response.Data.ShouldNotBeNull();
         response.Data.Films.ShouldNotBeNull();
+        response.Data.Films.Nodes.ShouldNotBeNull();
 
-        var film = response.Data.Films.FirstOrDefault();
+        var film = response.Data.Films.Nodes.FirstOrDefault();
         if (film != null)
         {
             film.Actors.ShouldNotBeNull();

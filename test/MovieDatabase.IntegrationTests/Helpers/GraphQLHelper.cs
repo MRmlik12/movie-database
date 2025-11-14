@@ -10,13 +10,23 @@ public static class GraphQLHelper
         string query,
         object? variables = null)
     {
-        var request = new
+        try
         {
-            query = query,
-            variables = variables
-        };
+            var request = new
+            {
+                query = query,
+                variables = variables
+            };
 
-        return await client.PostAsJsonAsync("/graphql", request);
+            return await client.PostAsJsonAsync("/graphql", request);
+        }
+        catch (HttpRequestException ex)
+        {
+            throw new HttpRequestException(
+                $"Failed to execute GraphQL query. Ensure the API is running and accessible. " +
+                $"Base Address: {client.BaseAddress}. Original error: {ex.Message}", 
+                ex);
+        }
     }
 
     public static async Task<GraphQLResponse<T>?> ExecuteQueryAsync<T>(

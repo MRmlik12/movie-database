@@ -1,12 +1,14 @@
-﻿using MovieDatabase.Api.Application.Films.Exceptions;
-using MovieDatabase.Api.Core.Cqrs;
+﻿using MovieDatabase.Api.Core.Cqrs;
 using MovieDatabase.Api.Core.Documents.Films;
 using MovieDatabase.Api.Core.Dtos;
+using MovieDatabase.Api.Core.Dtos.Films;
+using MovieDatabase.Api.Core.Exceptions.Films;
+using MovieDatabase.Api.Infrastructure.Db;
 using MovieDatabase.Api.Infrastructure.Db.Repositories;
 
 namespace MovieDatabase.Api.Application.Films.EditFilm;
 
-public class EditFilmRequestHandler(IFilmRepository filmRepository) : IRequestHandler<EditFilmRequest, FilmDto>
+public class EditFilmRequestHandler(IFilmRepository filmRepository, IUnitOfWork unitOfWork) : IRequestHandler<EditFilmRequest, FilmDto>
 {
     public async Task<FilmDto> HandleAsync(EditFilmRequest request)
     {
@@ -47,6 +49,8 @@ public class EditFilmRequestHandler(IFilmRepository filmRepository) : IRequestHa
         }).ToList();
 
         await filmRepository.Add(film);
+
+        await unitOfWork.Commit();
 
         return FilmDto.From(film);
     }

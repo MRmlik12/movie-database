@@ -7,7 +7,7 @@ using Shouldly;
 namespace MovieDatabase.IntegrationTests.Queries;
 
 [Collection("AspireAppHost")]
-public class DirectorQueryTests(AspireAppHostFixture fixture) : IClassFixture<AspireAppHostFixture>
+public class DirectorQueryTests(AspireAppHostFixture fixture)
 {
     private readonly HttpClient _httpClient = fixture.CreateHttpClient("movies-db-api");
 
@@ -16,10 +16,12 @@ public class DirectorQueryTests(AspireAppHostFixture fixture) : IClassFixture<As
     {
         const string query = """
                                  query {
-                                     directors {
-                                         id
-                                         name
-                                         surname
+                                     directors(first: 10) {
+                                         nodes {
+                                             id
+                                             name
+                                             surname
+                                         }
                                      }
                                  }
                              """;
@@ -29,28 +31,7 @@ public class DirectorQueryTests(AspireAppHostFixture fixture) : IClassFixture<As
         response.Errors.ShouldBeNull();
         response.Data.ShouldNotBeNull();
         response.Data.Directors.ShouldNotBeNull();
-        Assert.NotNull(response.Data.Directors);
-    }
-
-    [Fact]
-    public async Task GetDirectors_WithTermFilter_ShouldReturnFilteredDirectors()
-    {
-        const string query = """
-                                 query GetDirectorsByTerm($term: String) {
-                                     directors(term: $term) {
-                                         id
-                                         name
-                                         surname
-                                     }
-                                 }
-                             """;
-
-        var variables = new { term = "Spielberg" };
-
-        var response = await GraphQLHelper.ExecuteQueryAsync<DirectorsResponse>(_httpClient, query, variables);
-        response.ShouldNotBeNull();
-        response.Errors.ShouldBeNull();
-        response.Data.ShouldNotBeNull();
-        Assert.NotNull(response.Data);
+        response.Data.Directors.Nodes.ShouldNotBeNull();
+        response.Data.Directors.Nodes.ShouldNotBeEmpty();
     }
 }

@@ -1,27 +1,20 @@
-﻿using Microsoft.Azure.Cosmos;
-using Microsoft.Azure.Cosmos.Linq;
-
+﻿using Microsoft.EntityFrameworkCore;
 using User = MovieDatabase.Api.Core.Documents.Users.User;
 
 namespace MovieDatabase.Api.Infrastructure.Db.Repositories;
 
-public class UserRepository(CosmosWrapper wrapper) : IUserRepository
+public class UserRepository(AppDbContext context) : IUserRepository
 {
-    private Container Container { get; } = wrapper.Movies.GetContainer(nameof(User));
-
     public async Task Add(User user)
     {
-        await Container.UpsertItemAsync(user);
+        context.Users.Add(user);
+        await context.SaveChangesAsync();
     }
 
     public async Task<User?> GetByEmail(string email)
     {
-        using var iter = Container.GetItemLinqQueryable<User>()
-            .Where(u => u.Email == email)
-            .ToFeedIterator();
-
-        var response = await iter.ReadNextAsync();
-
-        return response.SingleOrDefault();
+        return await context.Users
+            .FirstOrDefaultAsync(u => u.Email == email);
     }
 }
+

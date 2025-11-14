@@ -2,10 +2,10 @@ using System.Security.Claims;
 using System.Text;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-
 using MovieDatabase.Api.Infrastructure.Db;
 using MovieDatabase.Api.Infrastructure.Db.Repositories;
 
@@ -14,21 +14,17 @@ namespace MovieDatabase.Api.Infrastructure;
 public static class InfrastructureExtensions
 {
     public static void AddInfrastructureDefaults(this IServiceCollection services, IConfiguration configuration)
-        => services.AddCosmosDefaults()
+        => services.AddUnitOfWork()
             .AddRepositories()
             .AddJwtAuthenticationDefaults(configuration);
 
-    private static IServiceCollection AddCosmosDefaults(this IServiceCollection services)
-    {
-        services.AddTransient<CosmosWrapper>();
-
-        return services;
-    }
-
+    private static IServiceCollection AddUnitOfWork(this IServiceCollection services)
+        => services.AddScoped<IUnitOfWork, UnitOfWork>();
+    
     private static IServiceCollection AddRepositories(this IServiceCollection services)
     {
-        services.AddTransient<IFilmRepository, FilmRepository>();
-        services.AddTransient<IUserRepository, UserRepository>();
+        services.AddScoped<IFilmRepository, FilmRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
 
         return services;
     }
@@ -48,7 +44,7 @@ public static class InfrastructureExtensions
                     ValidIssuer = configuration["Jwt:Issuer"],
                     ValidAudience = configuration["Jwt:Audience"],
                     IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(configuration["Jwt:Key"])),
+                        Encoding.UTF8.GetBytes(configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured"))),
                     RoleClaimType = ClaimTypes.Role
                 };
             });
@@ -58,3 +54,4 @@ public static class InfrastructureExtensions
         return services;
     }
 }
+

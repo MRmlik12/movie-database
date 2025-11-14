@@ -9,6 +9,7 @@ using MovieDatabase.Api.Application.Films.EditFilm;
 using MovieDatabase.Api.Core.Cqrs;
 using MovieDatabase.Api.Core.Documents.Users;
 using MovieDatabase.Api.Core.Dtos;
+using MovieDatabase.Api.Core.Dtos.Films;
 
 namespace MovieDatabase.Api.Mutations;
 
