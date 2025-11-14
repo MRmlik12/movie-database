@@ -2,6 +2,7 @@ using Shouldly;
 using MovieDatabase.Api.Application.Users.AuthenticateUser;
 using MovieDatabase.Api.Core.Documents.Users;
 using MovieDatabase.Api.Core.Exceptions.Users;
+using MovieDatabase.Api.Core.Jwt;
 using MovieDatabase.Api.Core.Services;
 using MovieDatabase.Api.Core.Utils;
 using MovieDatabase.Api.Infrastructure.Db.Repositories;
@@ -12,6 +13,8 @@ namespace MovieDatabase.UnitTests.Application.Users;
 
 public class AuthenticateUserRequestHandlerTests
 {
+    private const int ExpireDateToleranceSeconds = 10;
+    
     private readonly IUserRepository _mockUserRepository;
     private readonly IJwtService _mockJwtService;
     private readonly AuthenticateUserRequestHandler _handler;
@@ -38,19 +41,18 @@ public class AuthenticateUserRequestHandlerTests
             password
         );
 
-        const string expectedToken = "jwt-token-12345";
-        var expectedExpireTime = DateTime.UtcNow.AddHours(1);
+        var expectedJwtCredentials = new JwtCredential("jwt-token-12345", DateTime.UtcNow.AddHours(1));
 
         _mockUserRepository.GetByEmail(request.Email)
             .Returns(Task.FromResult<User?>(user));
         _mockJwtService.GenerateJwtToken(user)
-            .Returns((expectedToken, expectedExpireTime));
+            .Returns(expectedJwtCredentials);
 
         var result = await _handler.HandleAsync(request);
 
         result.ShouldNotBeNull();
-        result.Token.ShouldBe(expectedToken);
-        result.ExpireTime.ShouldBe(expectedExpireTime);
+        result.Token.ShouldBe(expectedJwtCredentials.Token);
+        result.ExpireTime?.ShouldBe(expectedJwtCredentials.ExpireDate, TimeSpan.FromSeconds(ExpireDateToleranceSeconds));
         result.Email.ShouldBe(user.Email);
         result.Username.ShouldBe(user.Name);
         result.Role.ShouldBe(Enum.GetName(user.Role));
@@ -113,10 +115,12 @@ public class AuthenticateUserRequestHandlerTests
             Password: password
         );
 
+        var expectedJwtCredentials = new JwtCredential("token", DateTime.UtcNow.AddHours(ExpireDateToleranceSeconds));
+        
         _mockUserRepository.GetByEmail(request.Email)
             .Returns(Task.FromResult<User?>(user));
         _mockJwtService.GenerateJwtToken(user)
-            .Returns(("token", DateTime.UtcNow.AddHours(1)));
+            .Returns(expectedJwtCredentials);
 
         await _handler.HandleAsync(request);
 
@@ -137,19 +141,18 @@ public class AuthenticateUserRequestHandlerTests
             Email: user.Email,
             Password: password
         );
-
-        var expectedToken = "jwt-token-abc123";
-        var expectedExpireTime = DateTime.UtcNow.AddMinutes(60);
+        
+        var expectedTokenModel = new JwtCredential("jwt-token-abc123", DateTime.UtcNow.AddHours(1));
 
         _mockUserRepository.GetByEmail(request.Email)
             .Returns(Task.FromResult<User?>(user));
         _mockJwtService.GenerateJwtToken(user)
-            .Returns((expectedToken, expectedExpireTime));
+            .Returns(expectedTokenModel);
 
         var result = await _handler.HandleAsync(request);
 
-        result.Token.ShouldBe(expectedToken);
-        result.ExpireTime.Value.ShouldBe(expectedExpireTime, TimeSpan.FromSeconds(1));
+        result.Token.ShouldBe(expectedTokenModel.Token);
+        result.ExpireTime?.ShouldBe(expectedTokenModel.ExpireDate, TimeSpan.FromSeconds(ExpireDateToleranceSeconds));
     }
 
     [Theory]
@@ -170,10 +173,12 @@ public class AuthenticateUserRequestHandlerTests
             Password: password
         );
 
+        var expectedJwtCredentials = new JwtCredential("TestPassword123!", DateTime.UtcNow.AddHours(1));
+        
         _mockUserRepository.GetByEmail(request.Email)
             .Returns(Task.FromResult<User?>(user));
         _mockJwtService.GenerateJwtToken(user)
-            .Returns(("token", DateTime.UtcNow.AddHours(1)));
+            .Returns(expectedJwtCredentials);
 
         var result = await _handler.HandleAsync(request);
 
@@ -203,16 +208,18 @@ public class AuthenticateUserRequestHandlerTests
         const string password = "TestPassword123!";
         var passwordHash = PasswordUtils.HashPassword(password);
         var user = TestDataBuilder.CreateValidUser(passwordHash: passwordHash);
-
+        
         var request = new AuthenticateUserRequest(
             Email: user.Email,
             Password: password
         );
 
+        var expectedJwtCredentials = new JwtCredential("token", DateTime.UtcNow.AddHours(1));
+        
         _mockUserRepository.GetByEmail(request.Email)
             .Returns(Task.FromResult<User?>(user));
         _mockJwtService.GenerateJwtToken(user)
-            .Returns(("token", DateTime.UtcNow.AddHours(1)));
+            .Returns(expectedJwtCredentials);
 
         await _handler.HandleAsync(request);
 

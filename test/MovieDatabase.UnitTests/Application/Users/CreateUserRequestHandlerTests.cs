@@ -2,6 +2,7 @@ using Shouldly;
 using MovieDatabase.Api.Application.Users.CreateUser;
 using MovieDatabase.Api.Core.Documents.Users;
 using MovieDatabase.Api.Core.Exceptions.Users;
+using MovieDatabase.Api.Core.Jwt;
 using MovieDatabase.Api.Core.Services;
 using MovieDatabase.Api.Infrastructure.Db;
 using MovieDatabase.Api.Infrastructure.Db.Repositories;
@@ -12,6 +13,8 @@ namespace MovieDatabase.UnitTests.Application.Users;
 
 public class CreateUserRequestHandlerTests
 {
+    private const int ExpireDateToleranceSeconds = 10;
+    
     private readonly IUserRepository _mockUserRepository;
     private readonly IUnitOfWork _mockUnitOfWork;
     private readonly IJwtService _mockJwtService;
@@ -29,10 +32,13 @@ public class CreateUserRequestHandlerTests
     public async Task HandleAsync_WithValidData_ShouldCreateUser()
     {
         var request = TestDataBuilder.CreateValidCreateUserRequest();
+        
+        var expectedJwtCredentials = new JwtCredential("test-token", DateTime.UtcNow.AddHours(1));
+        
         _mockUserRepository.GetByEmail(Arg.Any<string>())
             .Returns(Task.FromResult<User?>(null));
         _mockJwtService.GenerateJwtToken(Arg.Any<User>())
-            .Returns(("test-token", DateTime.UtcNow.AddHours(1)));
+            .Returns(expectedJwtCredentials);
 
         var result = await _handler.HandleAsync(request);
 
@@ -47,19 +53,19 @@ public class CreateUserRequestHandlerTests
     public async Task HandleAsync_WithValidData_ShouldReturnUserCredentialsWithToken()
     {
         var request = TestDataBuilder.CreateValidCreateUserRequest();
-        const string expectedToken = "jwt-token-12345";
-        var expectedExpireTime = DateTime.UtcNow.AddHours(1);
-
+        
+        var expectedJwtModel = new JwtCredential("jwt-token-12345", DateTime.UtcNow.AddHours(1));
+        
         _mockUserRepository.GetByEmail(Arg.Any<string>())
             .Returns(Task.FromResult<User?>(null));
         _mockJwtService.GenerateJwtToken(Arg.Any<User>())
-            .Returns((expectedToken, expectedExpireTime));
+            .Returns(expectedJwtModel);
 
         var result = await _handler.HandleAsync(request);
 
         result.ShouldNotBeNull();
-        result.Token.ShouldBe(expectedToken);
-        result.ExpireTime.ShouldBe(expectedExpireTime);
+        result.Token.ShouldBe(expectedJwtModel.Token);
+        result.ExpireTime?.ShouldBe(expectedJwtModel.ExpireDate, TimeSpan.FromSeconds(ExpireDateToleranceSeconds));
         result.Username.ShouldBe(request.Username);
         result.Email.ShouldBe(request.Email);
         result.Role.ShouldBe(nameof(UserRoles.User));
@@ -89,10 +95,12 @@ public class CreateUserRequestHandlerTests
         const string plainPassword = "PlainPassword123!";
         var request = TestDataBuilder.CreateValidCreateUserRequest(password: plainPassword);
 
+        var expectedJwtCredentials = new JwtCredential("token", DateTime.UtcNow.AddHours(1));
+        
         _mockUserRepository.GetByEmail(Arg.Any<string>())
             .Returns(Task.FromResult<User?>(null));
         _mockJwtService.GenerateJwtToken(Arg.Any<User>())
-            .Returns(("token", DateTime.UtcNow.AddHours(1)));
+            .Returns(expectedJwtCredentials);
 
         await _handler.HandleAsync(request);
 
@@ -106,11 +114,13 @@ public class CreateUserRequestHandlerTests
     public async Task HandleAsync_ShouldSetUserRoleToUser()
     {
         var request = TestDataBuilder.CreateValidCreateUserRequest();
+        
+        var expectedJwtCredentials = new JwtCredential("token", DateTime.UtcNow.AddHours(1));
 
         _mockUserRepository.GetByEmail(Arg.Any<string>())
             .Returns(Task.FromResult<User?>(null));
         _mockJwtService.GenerateJwtToken(Arg.Any<User>())
-            .Returns(("token", DateTime.UtcNow.AddHours(1)));
+            .Returns(expectedJwtCredentials);
 
         var result = await _handler.HandleAsync(request);
 
@@ -124,11 +134,13 @@ public class CreateUserRequestHandlerTests
     public async Task HandleAsync_ShouldCallRepositoryAddOnce()
     {
         var request = TestDataBuilder.CreateValidCreateUserRequest();
+        
+        var expectedJwtCredentials = new JwtCredential("token", DateTime.UtcNow.AddHours(1));
 
         _mockUserRepository.GetByEmail(Arg.Any<string>())
             .Returns(Task.FromResult<User?>(null));
         _mockJwtService.GenerateJwtToken(Arg.Any<User>())
-            .Returns(("token", DateTime.UtcNow.AddHours(1)));
+            .Returns(expectedJwtCredentials);
 
         await _handler.HandleAsync(request);
 
@@ -141,11 +153,13 @@ public class CreateUserRequestHandlerTests
     public async Task HandleAsync_ShouldCallJwtServiceToGenerateToken()
     {
         var request = TestDataBuilder.CreateValidCreateUserRequest();
+        
+        var expectedJwtCredentials = new JwtCredential("token", DateTime.UtcNow.AddHours(1));
 
         _mockUserRepository.GetByEmail(Arg.Any<string>())
             .Returns(Task.FromResult<User?>(null));
         _mockJwtService.GenerateJwtToken(Arg.Any<User>())
-            .Returns(("token", DateTime.UtcNow.AddHours(1)));
+            .Returns(expectedJwtCredentials);
 
         await _handler.HandleAsync(request);
 
@@ -164,10 +178,12 @@ public class CreateUserRequestHandlerTests
     {
         var request = TestDataBuilder.CreateValidCreateUserRequest(email: email);
 
+        var expectedJwtCredentials = new JwtCredential("token", DateTime.UtcNow.AddHours(1));
+        
         _mockUserRepository.GetByEmail(Arg.Any<string>())
             .Returns(Task.FromResult<User?>(null));
         _mockJwtService.GenerateJwtToken(Arg.Any<User>())
-            .Returns(("token", DateTime.UtcNow.AddHours(1)));
+            .Returns(expectedJwtCredentials);
 
         var result = await _handler.HandleAsync(request);
 

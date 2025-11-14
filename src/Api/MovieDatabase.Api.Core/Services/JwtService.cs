@@ -14,7 +14,7 @@ public class JwtService(IOptions<JwtSettings> options) : IJwtService
 {
     private readonly JwtSettings _settings = options.Value;
 
-    public (string? token, DateTime expireDate) GenerateJwtToken(User user)
+    public JwtCredential GenerateJwtToken(User user)
     {
         var now = DateTime.UtcNow;
         var expires = now.AddMinutes(_settings.ExpirationMinutes);
@@ -41,6 +41,6 @@ public class JwtService(IOptions<JwtSettings> options) : IJwtService
 
         var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
-        return (tokenString, expires);
+        return new JwtCredential(tokenString, expires);
     }
 }

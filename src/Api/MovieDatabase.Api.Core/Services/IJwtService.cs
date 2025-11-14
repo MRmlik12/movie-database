@@ -1,8 +1,9 @@
 ﻿using MovieDatabase.Api.Core.Documents.Users;
+using MovieDatabase.Api.Core.Jwt;
 
 namespace MovieDatabase.Api.Core.Services;
 
 public interface IJwtService
 {
-    (string? token, DateTime expireDate) GenerateJwtToken(User user);
+    JwtCredential GenerateJwtToken(User user);
 }

@@ -23,8 +23,8 @@ builder.Services
     .AddPagingArguments()
     .ModifyPagingOptions(opt =>
     {
-        opt.MaxPageSize = 20;
-        opt.DefaultPageSize = 20;
+        opt.MaxPageSize = Constants.Queries.MaxPageSize;
+        opt.DefaultPageSize = Constants.Queries.DefaultPageSize;
     })
     .AddTypeExtension<FilmMutations>()
     .AddTypeExtension<UserMutations>()
