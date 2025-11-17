@@ -14,6 +14,7 @@ public class ProducerQueryTests(AspireAppHostFixture fixture)
     [Fact]
     public async Task GetProducers_WithoutFilter_ShouldReturnAllProducers()
     {
+        // Arrange
         const string query = """
                                  query {
                                      producers(first: 10) {
@@ -25,13 +26,11 @@ public class ProducerQueryTests(AspireAppHostFixture fixture)
                                  }
                              """;
 
+        // Act
         var response = await GraphQLHelper.ExecuteQueryAsync<ProducersResponse>(_httpClient, query);
 
+        // Assert
         response.ShouldNotBeNull();
-        if (response.Errors != null)
-        {
-            Console.WriteLine($"GraphQL Errors: {string.Join("; ", response.Errors.Select(e => e.Message))}");
-        }
         response.Errors.ShouldBeNull();
         response.Data.ShouldNotBeNull();
         response.Data.Producers.ShouldNotBeNull();

@@ -29,6 +29,7 @@ public class AuthenticateUserRequestHandlerTests
     [Fact]
     public async Task HandleAsync_WithValidCredentials_ShouldReturnUserCredentials()
     {
+        // Arrange
         const string password = "TestPassword123!";
         var passwordHash = PasswordUtils.HashPassword(password);
         var user = TestDataBuilder.CreateValidUser(
@@ -48,8 +49,10 @@ public class AuthenticateUserRequestHandlerTests
         _mockJwtService.GenerateJwtToken(user)
             .Returns(expectedJwtCredentials);
 
+        // Act
         var result = await _handler.HandleAsync(request);
 
+        // Assert
         result.ShouldNotBeNull();
         result.Token.ShouldBe(expectedJwtCredentials.Token);
         result.ExpireTime?.ShouldBe(expectedJwtCredentials.ExpireDate, TimeSpan.FromSeconds(ExpireDateToleranceSeconds));
@@ -61,6 +64,7 @@ public class AuthenticateUserRequestHandlerTests
     [Fact]
     public async Task HandleAsync_WithInvalidEmail_ShouldThrowInvalidUserCredentialsException()
     {
+        // Arrange
         var request = new AuthenticateUserRequest(
             "nonexistent@example.com",
              "SomePassword123!"
@@ -69,9 +73,11 @@ public class AuthenticateUserRequestHandlerTests
         _mockUserRepository.GetByEmail(request.Email)
             .Returns(Task.FromResult<User?>(null));
 
-        await Assert.ThrowsAsync<InvalidUserCredentialsApplicationException>(
-            () => _handler.HandleAsync(request)
-        );
+        // Act
+        Func<Task> act = () => _handler.HandleAsync(request);
+
+        // Assert
+        await Assert.ThrowsAsync<InvalidUserCredentialsApplicationException>(act);
 
         _mockJwtService.DidNotReceive().GenerateJwtToken(Arg.Any<User>());
     }
@@ -79,6 +85,7 @@ public class AuthenticateUserRequestHandlerTests
     [Fact]
     public async Task HandleAsync_WithInvalidPassword_ShouldThrowInvalidUserCredentialsException()
     {
+        // Arrange
         const string correctPassword = "CorrectPassword123!";
         const string incorrectPassword = "WrongPassword456!";
         var passwordHash = PasswordUtils.HashPassword(correctPassword);
@@ -96,9 +103,11 @@ public class AuthenticateUserRequestHandlerTests
         _mockUserRepository.GetByEmail(request.Email)
             .Returns(Task.FromResult<User?>(user));
 
-        await Assert.ThrowsAsync<InvalidUserCredentialsApplicationException>(
-            () => _handler.HandleAsync(request)
-        );
+        // Act
+        Func<Task> act2 = () => _handler.HandleAsync(request);
+
+        // Assert
+        await Assert.ThrowsAsync<InvalidUserCredentialsApplicationException>(act2);
 
         _mockJwtService.DidNotReceive().GenerateJwtToken(Arg.Any<User>());
     }
@@ -106,6 +115,7 @@ public class AuthenticateUserRequestHandlerTests
     [Fact]
     public async Task HandleAsync_ShouldGenerateJwtToken()
     {
+        // Arrange
         const string password = "TestPassword123!";
         var passwordHash = PasswordUtils.HashPassword(password);
         var user = TestDataBuilder.CreateValidUser(passwordHash: passwordHash);
@@ -122,8 +132,10 @@ public class AuthenticateUserRequestHandlerTests
         _mockJwtService.GenerateJwtToken(user)
             .Returns(expectedJwtCredentials);
 
+        // Act
         await _handler.HandleAsync(request);
 
+        // Assert
         _mockJwtService.Received(1).GenerateJwtToken(Arg.Is<User>(u =>
             u.Id == user.Id &&
             u.Email == user.Email &&
@@ -133,6 +145,7 @@ public class AuthenticateUserRequestHandlerTests
     [Fact]
     public async Task HandleAsync_ShouldReturnTokenWithExpirationTime()
     {
+        // Arrange
         const string password = "TestPassword123!";
         var passwordHash = PasswordUtils.HashPassword(password);
         var user = TestDataBuilder.CreateValidUser(passwordHash: passwordHash);
@@ -149,8 +162,10 @@ public class AuthenticateUserRequestHandlerTests
         _mockJwtService.GenerateJwtToken(user)
             .Returns(expectedTokenModel);
 
+        // Act
         var result = await _handler.HandleAsync(request);
 
+        // Assert
         result.Token.ShouldBe(expectedTokenModel.Token);
         result.ExpireTime?.ShouldBe(expectedTokenModel.ExpireDate, TimeSpan.FromSeconds(ExpireDateToleranceSeconds));
     }
@@ -161,6 +176,7 @@ public class AuthenticateUserRequestHandlerTests
     [InlineData(UserRoles.Administrator)]
     public async Task HandleAsync_WithDifferentUserRoles_ShouldReturnCorrectRole(UserRoles role)
     {
+        // Arrange
         var password = "TestPassword123!";
         var passwordHash = PasswordUtils.HashPassword(password);
         var user = TestDataBuilder.CreateValidUser(
@@ -180,14 +196,17 @@ public class AuthenticateUserRequestHandlerTests
         _mockJwtService.GenerateJwtToken(user)
             .Returns(expectedJwtCredentials);
 
+        // Act
         var result = await _handler.HandleAsync(request);
 
+        // Assert
         result.Role.ShouldBe(Enum.GetName(role));
     }
 
     [Fact]
     public async Task HandleAsync_WithEmptyPassword_ShouldThrowInvalidUserCredentialsException()
     {
+        // Arrange
         var user = TestDataBuilder.CreateValidUser();
         var request = new AuthenticateUserRequest(
             Email: user.Email,
@@ -197,6 +216,7 @@ public class AuthenticateUserRequestHandlerTests
         _mockUserRepository.GetByEmail(request.Email)
             .Returns(Task.FromResult<User?>(user));
 
+        // Act & Assert
         await Assert.ThrowsAsync<InvalidUserCredentialsApplicationException>(
             () => _handler.HandleAsync(request)
         );
@@ -205,6 +225,7 @@ public class AuthenticateUserRequestHandlerTests
     [Fact]
     public async Task HandleAsync_ShouldCallRepositoryGetByEmailOnce()
     {
+        // Arrange
         const string password = "TestPassword123!";
         var passwordHash = PasswordUtils.HashPassword(password);
         var user = TestDataBuilder.CreateValidUser(passwordHash: passwordHash);
@@ -221,9 +242,10 @@ public class AuthenticateUserRequestHandlerTests
         _mockJwtService.GenerateJwtToken(user)
             .Returns(expectedJwtCredentials);
 
+        // Act
         await _handler.HandleAsync(request);
 
+        // Assert
         await _mockUserRepository.Received(1).GetByEmail(request.Email);
     }
 }
-

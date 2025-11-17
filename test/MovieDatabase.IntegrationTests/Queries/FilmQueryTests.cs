@@ -14,6 +14,7 @@ public class FilmQueryTests(AspireAppHostFixture fixture)
     [Fact]
     public async Task GetFilms_WithoutFilter_ShouldReturnAllFilms()
     {
+        // Arrange
         const string query = """
                                  query {
                                      films(first: 10) {
@@ -27,8 +28,10 @@ public class FilmQueryTests(AspireAppHostFixture fixture)
                                  }
                              """;
 
+        // Act
         var response = await GraphQLHelper.ExecuteQueryAsync<FilmsResponse>(_httpClient, query);
 
+        // Assert
         response.ShouldNotBeNull();
         response.Errors.ShouldBeNull();
         response.Data.ShouldNotBeNull();
@@ -40,6 +43,7 @@ public class FilmQueryTests(AspireAppHostFixture fixture)
     [Fact]
     public async Task GetFilms_ShouldIncludeActorsAndDirectors()
     {
+        // Arrange
         const string query = """
                                  query {
                                      films(first: 10) {
@@ -69,8 +73,10 @@ public class FilmQueryTests(AspireAppHostFixture fixture)
                                  }
                              """;
 
+        // Act
         var response = await GraphQLHelper.ExecuteQueryAsync<FilmsResponse>(_httpClient, query);
 
+        // Assert
         response.ShouldNotBeNull();
         response.Errors.ShouldBeNull();
         response.Data.ShouldNotBeNull();

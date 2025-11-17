@@ -30,6 +30,7 @@ public class JwtServiceTests
     [Fact]
     public void GenerateJwtToken_ShouldReturnValidToken()
     {
+        // Arrange
         var user = new User
         {
             Id = Guid.NewGuid(),
@@ -38,8 +39,10 @@ public class JwtServiceTests
             Role = UserRoles.User
         };
 
+        // Act
         var (token, expireDate) = _jwtService.GenerateJwtToken(user);
 
+        // Assert
         token.ShouldNotBeNullOrEmpty();
         expireDate.ShouldBeGreaterThan(DateTime.UtcNow);
     }
@@ -47,6 +50,7 @@ public class JwtServiceTests
     [Fact]
     public void GenerateJwtToken_ShouldIncludeUserClaims()
     {
+        // Arrange
         var userId = Guid.NewGuid();
         var user = new User
         {
@@ -56,8 +60,10 @@ public class JwtServiceTests
             Role = UserRoles.User
         };
 
+        // Act
         var (token, _) = _jwtService.GenerateJwtToken(user);
 
+        // Assert
         var handler = new JwtSecurityTokenHandler();
         var jwtToken = handler.ReadJwtToken(token);
 
@@ -71,6 +77,7 @@ public class JwtServiceTests
     [Fact]
     public void GenerateJwtToken_ShouldSetCorrectExpirationTime()
     {
+        // Arrange
         var user = new User
         {
             Id = Guid.NewGuid(),
@@ -80,8 +87,10 @@ public class JwtServiceTests
         };
         var beforeGeneration = DateTime.UtcNow;
 
+        // Act
         var (_, expireDate) = _jwtService.GenerateJwtToken(user);
 
+        // Assert
         var afterGeneration = DateTime.UtcNow;
         var expectedExpiration = beforeGeneration.AddMinutes(_jwtSettings.ExpirationMinutes);
         
@@ -92,6 +101,7 @@ public class JwtServiceTests
     [Fact]
     public void GenerateJwtToken_TokenShouldBeDecodable()
     {
+        // Arrange
         var user = new User
         {
             Id = Guid.NewGuid(),
@@ -100,8 +110,10 @@ public class JwtServiceTests
             Role = UserRoles.User
         };
 
+        // Act
         var (token, _) = _jwtService.GenerateJwtToken(user);
 
+        // Assert
         var handler = new JwtSecurityTokenHandler();
         var canRead = handler.CanReadToken(token);
         canRead.ShouldBeTrue();
@@ -115,6 +127,7 @@ public class JwtServiceTests
     [Fact]
     public void GenerateJwtToken_ShouldIncludeRoleClaim()
     {
+        // Arrange
         var testCases = new[]
         {
             (UserRoles.User, "User"),
@@ -122,6 +135,7 @@ public class JwtServiceTests
             (UserRoles.Administrator, "Administrator")
         };
 
+        // Act
         foreach (var (role, expectedRoleName) in testCases)
         {
             var user = new User
@@ -137,6 +151,7 @@ public class JwtServiceTests
             var handler = new JwtSecurityTokenHandler();
             var jwtToken = handler.ReadJwtToken(token);
 
+            // Assert
             jwtToken.Claims.ShouldContain(c => 
                 c.Type == ClaimTypes.Role && 
                 c.Value == expectedRoleName,
@@ -147,6 +162,7 @@ public class JwtServiceTests
     [Fact]
     public void GenerateJwtToken_ShouldGenerateDifferentTokensForSameUser()
     {
+        // Arrange
         var user = new User
         {
             Id = Guid.NewGuid(),
@@ -155,16 +171,19 @@ public class JwtServiceTests
             Role = UserRoles.User
         };
 
+        // Act
         var (token1, _) = _jwtService.GenerateJwtToken(user);
         Thread.Sleep(10);
         var (token2, _) = _jwtService.GenerateJwtToken(user);
 
+        // Assert
         token1.ShouldNotBe(token2, "each token generation should produce a unique token");
     }
 
     [Fact]
     public void GenerateJwtToken_WithDifferentUsers_ShouldGenerateDifferentTokens()
     {
+        // Arrange
         var user1 = new User
         {
             Id = Guid.NewGuid(),
@@ -181,9 +200,11 @@ public class JwtServiceTests
             Role = UserRoles.Administrator
         };
 
+        // Act
         var (token1, _) = _jwtService.GenerateJwtToken(user1);
         var (token2, _) = _jwtService.GenerateJwtToken(user2);
 
+        // Assert
         token1.ShouldNotBe(token2);
 
         var handler = new JwtSecurityTokenHandler();

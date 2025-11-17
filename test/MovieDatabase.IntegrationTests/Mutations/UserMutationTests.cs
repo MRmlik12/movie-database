@@ -16,6 +16,7 @@ public class UserMutationTests(AspireAppHostFixture fixture)
     [Fact]
     public async Task RegisterUser_WithValidData_ShouldReturnCredentials()
     {
+        // Arrange
         const string mutation = """
                                     mutation RegisterUser($request: CreateUserRequestInput!) {
                                         registerUser(request: $request) {
@@ -33,9 +34,11 @@ public class UserMutationTests(AspireAppHostFixture fixture)
 
         var variables = new { request };
 
+        // Act
         var response = await GraphQLHelper.ExecuteMutationAsync<RegisterUserResponse>(
             _httpClient, mutation, variables);
 
+        // Assert
         response.ShouldNotBeNull();
         response.Errors.ShouldBeNull();
         response.Data.ShouldNotBeNull();
@@ -48,6 +51,7 @@ public class UserMutationTests(AspireAppHostFixture fixture)
     [Fact]
     public async Task RegisterUser_WithDuplicateEmail_ShouldReturnError()
     {
+        // Arrange
         var email = $"duplicate_{Guid.NewGuid():N}@example.com";
 
         const string mutation = """
@@ -64,6 +68,7 @@ public class UserMutationTests(AspireAppHostFixture fixture)
             "Password123!"
         );
 
+        // Act
         await GraphQLHelper.ExecuteMutationAsync<RegisterUserResponse>(_httpClient, mutation, new { request = request1 });
 
         var request2 = new CreateUserRequest(
@@ -74,6 +79,7 @@ public class UserMutationTests(AspireAppHostFixture fixture)
 
         var response = await GraphQLHelper.ExecuteMutationAsync(_httpClient, mutation, new { request = request2 });
 
+        // Assert
         var content = await response.Content.ReadAsStringAsync();
         var hasError = content.Contains("error", StringComparison.OrdinalIgnoreCase) ||
                        content.Contains("already exists", StringComparison.OrdinalIgnoreCase) ||
@@ -85,6 +91,7 @@ public class UserMutationTests(AspireAppHostFixture fixture)
     [Fact]
     public async Task LoginUser_WithValidCredentials_ShouldReturnToken()
     {
+        // Arrange
         var email = $"logintest_{Guid.NewGuid():N}@example.com";
         const string password = "SecurePassword123!";
 
@@ -102,6 +109,7 @@ public class UserMutationTests(AspireAppHostFixture fixture)
             password
         );
 
+        // Act
         await GraphQLHelper.ExecuteMutationAsync<RegisterUserResponse>(
             _httpClient, registerMutation, new { request = registerRequest });
 
@@ -122,6 +130,7 @@ public class UserMutationTests(AspireAppHostFixture fixture)
         var response = await GraphQLHelper.ExecuteMutationAsync<LoginUserResponse>(
             _httpClient, loginMutation, new { request = loginRequest });
 
+        // Assert
         response.ShouldNotBeNull();
         response.Errors.ShouldBeNull();
         response.Data.ShouldNotBeNull();
@@ -132,6 +141,7 @@ public class UserMutationTests(AspireAppHostFixture fixture)
     [Fact]
     public async Task LoginUser_WithInvalidCredentials_ShouldReturnError()
     {
+        // Arrange
         const string mutation = """
                                     mutation LoginUser($request: AuthenticateUserRequestInput!) {
                                         loginUser(request: $request) {
@@ -145,8 +155,10 @@ public class UserMutationTests(AspireAppHostFixture fixture)
             "WrongPassword123!"
         );
 
+        // Act
         var response = await GraphQLHelper.ExecuteMutationAsync(_httpClient, mutation, new { request });
 
+        // Assert
         var content = await response.Content.ReadAsStringAsync();
         var hasError = content.Contains("error", StringComparison.OrdinalIgnoreCase) ||
                        response.StatusCode == System.Net.HttpStatusCode.BadRequest;

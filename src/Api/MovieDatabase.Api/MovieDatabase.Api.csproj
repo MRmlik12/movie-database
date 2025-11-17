@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Shared\MovieDatabase.SharedKernel\MovieDatabase.SharedKernel.csproj" />
     <ProjectReference Include="..\MovieDatabase.Api.Application\MovieDatabase.Api.Application.csproj" />
     <ProjectReference Include="..\MovieDatabase.Api.Infrastructure\MovieDatabase.Api.Infrastructure.csproj" />
   </ItemGroup>

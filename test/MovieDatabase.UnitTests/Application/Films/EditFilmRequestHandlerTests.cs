@@ -25,6 +25,7 @@ public class EditFilmRequestHandlerTests
     [Fact]
     public async Task HandleAsync_WithValidData_ShouldUpdateFilm()
     {
+        // Arrange
         var filmId = Guid.NewGuid();
         var filmIdString = filmId.ToString();
         var existingFilm = TestDataBuilder.CreateValidFilm(id: filmId);
@@ -33,8 +34,10 @@ public class EditFilmRequestHandlerTests
         _mockFilmRepository.GetById(filmIdString)
             .Returns(Task.FromResult<Film?>(existingFilm));
 
+        // Act
         var result = await _handler.HandleAsync(request);
 
+        // Assert
         result.ShouldNotBeNull();
         result.Title.ShouldBe(request.Title);
         await _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
@@ -46,15 +49,18 @@ public class EditFilmRequestHandlerTests
     [Fact]
     public async Task HandleAsync_WithNonExistentFilm_ShouldThrowFilmNotFoundException()
     {
+        // Arrange
         var filmIdString = Guid.NewGuid().ToString();
         var request = CreateValidEditRequest(filmIdString);
 
         _mockFilmRepository.GetById(filmIdString)
             .Returns(Task.FromResult<Film?>(null));
 
-        await Assert.ThrowsAsync<FilmNotExistsApplicationException>(
-            () => _handler.HandleAsync(request)
-        );
+        // Act
+        Func<Task> act = () => _handler.HandleAsync(request);
+
+        // Assert
+        await Assert.ThrowsAsync<FilmNotExistsApplicationException>(act);
 
         await _mockFilmRepository.DidNotReceive().Add(Arg.Any<Film>());
         await _mockUnitOfWork.DidNotReceive().Commit();
@@ -63,6 +69,7 @@ public class EditFilmRequestHandlerTests
     [Fact]
     public async Task HandleAsync_ShouldUpdateAllFields()
     {
+        // Arrange
         var filmId = Guid.NewGuid();
         var filmIdString = filmId.ToString();
         var existingFilm = TestDataBuilder.CreateValidFilm(
@@ -91,8 +98,10 @@ public class EditFilmRequestHandlerTests
         _mockFilmRepository.GetById(filmIdString)
             .Returns(Task.FromResult<Film?>(existingFilm));
 
+        // Act
         await _handler.HandleAsync(request);
 
+        // Assert
         await _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
             f.Title == "New Title" &&
             f.Description == "New Description" &&
@@ -109,6 +118,7 @@ public class EditFilmRequestHandlerTests
     [Fact]
     public async Task HandleAsync_ShouldCallRepositoryAddOnce()
     {
+        // Arrange
         var filmId = Guid.NewGuid();
         var filmIdString = filmId.ToString();
         var existingFilm = TestDataBuilder.CreateValidFilm(id: filmId);
@@ -117,8 +127,10 @@ public class EditFilmRequestHandlerTests
         _mockFilmRepository.GetById(filmIdString)
             .Returns(Task.FromResult<Film?>(existingFilm));
 
+        // Act
         await _handler.HandleAsync(request);
 
+        // Assert
         await _mockFilmRepository.Received(1).Add(Arg.Any<Film>());
         await _mockFilmRepository.Received(1).GetById(filmIdString);
         await _mockUnitOfWork.Received(1).Commit();
@@ -127,6 +139,7 @@ public class EditFilmRequestHandlerTests
     [Fact]
     public async Task HandleAsync_ShouldReturnUpdatedFilmDto()
     {
+        // Arrange
         var filmId = Guid.NewGuid();
         var filmIdString = filmId.ToString();
         var existingFilm = TestDataBuilder.CreateValidFilm(id: filmId);
@@ -135,8 +148,10 @@ public class EditFilmRequestHandlerTests
         _mockFilmRepository.GetById(filmIdString)
             .Returns(Task.FromResult<Film?>(existingFilm));
 
+        // Act
         var result = await _handler.HandleAsync(request);
 
+        // Assert
         result.ShouldNotBeNull();
         result.Id.ShouldBe(filmIdString);
         result.Title.ShouldBe(request.Title);
@@ -150,6 +165,7 @@ public class EditFilmRequestHandlerTests
     [Fact]
     public async Task HandleAsync_WithExistingIds_ShouldPreserveIds()
     {
+        // Arrange
         var filmId = Guid.NewGuid();
         var filmIdString = filmId.ToString();
         var actorId = Guid.NewGuid().ToString();
@@ -179,8 +195,10 @@ public class EditFilmRequestHandlerTests
         _mockFilmRepository.GetById(filmIdString)
             .Returns(Task.FromResult<Film?>(existingFilm));
 
+        // Act
         await _handler.HandleAsync(request);
 
+        // Assert
         await _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
             f.Actors[0].Id == Guid.Parse(actorId) &&
             f.Genres[0].Id == Guid.Parse(genreId) &&
@@ -209,4 +227,3 @@ public class EditFilmRequestHandlerTests
         );
     }
 }
-

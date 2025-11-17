@@ -20,6 +20,7 @@ public class FilmMutationTests(AspireAppHostFixture fixture)
     [Fact]
     public async Task CreateFilm_WithoutAuthentication_ShouldReturnUnauthorized()
     {
+        // Arrange
         const string mutation = """
                                     mutation CreateFilm($input: CreateFilmInput!) {
                                         createFilm(input: $input) {
@@ -41,8 +42,10 @@ public class FilmMutationTests(AspireAppHostFixture fixture)
 
         var variables = new { input };
 
+        // Act
         var response = await GraphQLHelper.ExecuteMutationAsync(_httpClient, mutation, variables);
 
+        // Assert
         var content = await response.Content.ReadAsStringAsync();
         var hasAuthError = content.Contains("authorize", StringComparison.OrdinalIgnoreCase) ||
                           content.Contains("authenticated", StringComparison.OrdinalIgnoreCase) ||
@@ -54,6 +57,7 @@ public class FilmMutationTests(AspireAppHostFixture fixture)
     [Fact(Skip = "Authorization headers are not properly propagated to GraphQL requests in the current test infrastructure")]
     public async Task CreateFilm_WithAdminUser_ShouldCreateFilm()
     {
+        // Arrange
         var token = await GetAdminTokenAsync();
 
         var client = fixture.CreateHttpClient("movies-db-api");
@@ -82,9 +86,11 @@ public class FilmMutationTests(AspireAppHostFixture fixture)
 
         var variables = new { input };
 
+        // Act
         var response = await GraphQLHelper.ExecuteMutationAsync<CreateFilmResponse>(
             client, mutation, variables);
 
+        // Assert
         if (response?.Errors != null && response.Errors.Length > 0)
         {
             var errorMsg = string.Join(", ", response.Errors.Select(e => e.Message));
@@ -103,6 +109,7 @@ public class FilmMutationTests(AspireAppHostFixture fixture)
     [Fact(Skip = "Authorization headers are not properly propagated to GraphQL requests in the current test infrastructure")]
     public async Task EditFilm_WithModeratorUser_ShouldUpdateFilm()
     {
+        // Arrange
         var adminToken = await GetAdminTokenAsync();
 
         var client = fixture.CreateHttpClient("movies-db-api");
@@ -127,9 +134,11 @@ public class FilmMutationTests(AspireAppHostFixture fixture)
             Producer: new CreateFilmInput.ProducerPlaceholder(null, "Producer One")
         );
 
+        // Act
         var createResponse = await GraphQLHelper.ExecuteMutationAsync<CreateFilmResponse>(
             client, createMutation, new { input = createInput });
 
+        // Assert
         if (createResponse?.Errors != null && createResponse.Errors.Length > 0)
         {
             var errorMsg = string.Join(", ", createResponse.Errors.Select(e => e.Message));
@@ -163,9 +172,11 @@ public class FilmMutationTests(AspireAppHostFixture fixture)
             Producer: new EditFilmInput.EditFilmProducerPlaceholder(null, "Updated Producer")
         );
 
+        // Act
         var editResponse = await GraphQLHelper.ExecuteMutationAsync<EditFilmResponse>(
             client, editMutation, new { input = editInput });
 
+        // Assert
         editResponse.ShouldNotBeNull();
         editResponse.Errors.ShouldBeNull();
         editResponse.Data.ShouldNotBeNull();
@@ -177,6 +188,7 @@ public class FilmMutationTests(AspireAppHostFixture fixture)
     [Fact(Skip = "Authorization headers are not properly propagated to GraphQL requests in the current test infrastructure")]
     public async Task DeleteFilm_WithAdminUser_ShouldDeleteFilm()
     {
+        // Arrange
         var token = await GetAdminTokenAsync();
 
         var client = fixture.CreateHttpClient("movies-db-api");
@@ -201,9 +213,11 @@ public class FilmMutationTests(AspireAppHostFixture fixture)
             Producer: new CreateFilmInput.ProducerPlaceholder(null, "Producer Name")
         );
 
+        // Act
         var createResponse = await GraphQLHelper.ExecuteMutationAsync<CreateFilmResponse>(
             client, createMutation, new { input = createInput });
 
+        // Assert
         if (createResponse?.Errors != null && createResponse.Errors.Length > 0)
         {
             var errorMsg = string.Join(", ", createResponse.Errors.Select(e => e.Message));
@@ -224,9 +238,11 @@ public class FilmMutationTests(AspireAppHostFixture fixture)
 
         var deleteVariables = new { filmId };
 
+        // Act
         var deleteResponse = await GraphQLHelper.ExecuteMutationAsync<DeleteFilmResponse>(
             client, deleteMutation, deleteVariables);
 
+        // Assert
         deleteResponse.ShouldNotBeNull();
         deleteResponse.Errors.ShouldBeNull();
         deleteResponse.Data.ShouldNotBeNull();
@@ -255,9 +271,9 @@ public class FilmMutationTests(AspireAppHostFixture fixture)
         var loginResponse = await GraphQLHelper.ExecuteMutationAsync<LoginUserResponse>(
             _httpClient, loginMutation, new { request });
 
-        if (loginResponse?.Data?.LoginUser?.Token != null)
+        if (loginResponse.Data.LoginUser?.Token is string token)
         {
-            return loginResponse.Data.LoginUser.Token;
+            return token;
         }
 
         var error = loginResponse?.Errors?.FirstOrDefault();

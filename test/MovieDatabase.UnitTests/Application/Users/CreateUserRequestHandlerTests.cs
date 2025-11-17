@@ -31,6 +31,7 @@ public class CreateUserRequestHandlerTests
     [Fact]
     public async Task HandleAsync_WithValidData_ShouldCreateUser()
     {
+        // Arrange
         var request = TestDataBuilder.CreateValidCreateUserRequest();
         
         var expectedJwtCredentials = new JwtCredential("test-token", DateTime.UtcNow.AddHours(1));
@@ -40,8 +41,10 @@ public class CreateUserRequestHandlerTests
         _mockJwtService.GenerateJwtToken(Arg.Any<User>())
             .Returns(expectedJwtCredentials);
 
+        // Act
         var result = await _handler.HandleAsync(request);
 
+        // Assert
         result.ShouldNotBeNull();
         await _mockUserRepository.Received(1).Add(Arg.Is<User>(u => 
             u.Name == request.Username && 
@@ -52,6 +55,7 @@ public class CreateUserRequestHandlerTests
     [Fact]
     public async Task HandleAsync_WithValidData_ShouldReturnUserCredentialsWithToken()
     {
+        // Arrange
         var request = TestDataBuilder.CreateValidCreateUserRequest();
         
         var expectedJwtModel = new JwtCredential("jwt-token-12345", DateTime.UtcNow.AddHours(1));
@@ -61,8 +65,10 @@ public class CreateUserRequestHandlerTests
         _mockJwtService.GenerateJwtToken(Arg.Any<User>())
             .Returns(expectedJwtModel);
 
+        // Act
         var result = await _handler.HandleAsync(request);
 
+        // Assert
         result.ShouldNotBeNull();
         result.Token.ShouldBe(expectedJwtModel.Token);
         result.ExpireTime?.ShouldBe(expectedJwtModel.ExpireDate, TimeSpan.FromSeconds(ExpireDateToleranceSeconds));
@@ -75,15 +81,18 @@ public class CreateUserRequestHandlerTests
     [Fact]
     public async Task HandleAsync_WithDuplicateEmail_ShouldThrowDuplicateEmailException()
     {
+        // Arrange
         var request = TestDataBuilder.CreateValidCreateUserRequest(email: "existing@example.com");
         var existingUser = TestDataBuilder.CreateValidUser(email: "existing@example.com");
 
         _mockUserRepository.GetByEmail(request.Email)
             .Returns(Task.FromResult<User?>(existingUser));
 
-        await Assert.ThrowsAsync<DuplicateEmailApplicationException>(
-            () => _handler.HandleAsync(request)
-        );
+        // Act
+        Func<Task> act = () => _handler.HandleAsync(request);
+
+        // Assert
+        await Assert.ThrowsAsync<DuplicateEmailApplicationException>(act);
 
         await _mockUserRepository.DidNotReceive().Add(Arg.Any<User>());
         await _mockUnitOfWork.DidNotReceive().Commit();
@@ -92,6 +101,7 @@ public class CreateUserRequestHandlerTests
     [Fact]
     public async Task HandleAsync_ShouldHashPassword()
     {
+        // Arrange
         const string plainPassword = "PlainPassword123!";
         var request = TestDataBuilder.CreateValidCreateUserRequest(password: plainPassword);
 
@@ -102,8 +112,10 @@ public class CreateUserRequestHandlerTests
         _mockJwtService.GenerateJwtToken(Arg.Any<User>())
             .Returns(expectedJwtCredentials);
 
+        // Act
         await _handler.HandleAsync(request);
 
+        // Assert
         await _mockUserRepository.Received(1).Add(Arg.Is<User>(u =>
             u.PasswordHash != plainPassword &&
             u.PasswordHash.StartsWith("$2")));
@@ -113,6 +125,7 @@ public class CreateUserRequestHandlerTests
     [Fact]
     public async Task HandleAsync_ShouldSetUserRoleToUser()
     {
+        // Arrange
         var request = TestDataBuilder.CreateValidCreateUserRequest();
         
         var expectedJwtCredentials = new JwtCredential("token", DateTime.UtcNow.AddHours(1));
@@ -122,8 +135,10 @@ public class CreateUserRequestHandlerTests
         _mockJwtService.GenerateJwtToken(Arg.Any<User>())
             .Returns(expectedJwtCredentials);
 
+        // Act
         var result = await _handler.HandleAsync(request);
 
+        // Assert
         result.Role.ShouldBe(nameof(UserRoles.User));
         await _mockUserRepository.Received(1).Add(Arg.Is<User>(u => 
             u.Role == UserRoles.User));
@@ -133,6 +148,7 @@ public class CreateUserRequestHandlerTests
     [Fact]
     public async Task HandleAsync_ShouldCallRepositoryAddOnce()
     {
+        // Arrange
         var request = TestDataBuilder.CreateValidCreateUserRequest();
         
         var expectedJwtCredentials = new JwtCredential("token", DateTime.UtcNow.AddHours(1));
@@ -142,8 +158,10 @@ public class CreateUserRequestHandlerTests
         _mockJwtService.GenerateJwtToken(Arg.Any<User>())
             .Returns(expectedJwtCredentials);
 
+        // Act
         await _handler.HandleAsync(request);
 
+        // Assert
         await _mockUserRepository.Received(1).Add(Arg.Any<User>());
         await _mockUserRepository.Received(1).GetByEmail(request.Email);
         await _mockUnitOfWork.Received(1).Commit();
@@ -152,6 +170,7 @@ public class CreateUserRequestHandlerTests
     [Fact]
     public async Task HandleAsync_ShouldCallJwtServiceToGenerateToken()
     {
+        // Arrange
         var request = TestDataBuilder.CreateValidCreateUserRequest();
         
         var expectedJwtCredentials = new JwtCredential("token", DateTime.UtcNow.AddHours(1));
@@ -161,8 +180,10 @@ public class CreateUserRequestHandlerTests
         _mockJwtService.GenerateJwtToken(Arg.Any<User>())
             .Returns(expectedJwtCredentials);
 
+        // Act
         await _handler.HandleAsync(request);
 
+        // Assert
         _mockJwtService.Received(1).GenerateJwtToken(Arg.Is<User>(u =>
             u.Name == request.Username &&
             u.Email == request.Email &&
@@ -176,6 +197,7 @@ public class CreateUserRequestHandlerTests
     [InlineData("admin@test-domain.com")]
     public async Task HandleAsync_WithVariousEmailFormats_ShouldSucceed(string email)
     {
+        // Arrange
         var request = TestDataBuilder.CreateValidCreateUserRequest(email: email);
 
         var expectedJwtCredentials = new JwtCredential("token", DateTime.UtcNow.AddHours(1));
@@ -185,11 +207,12 @@ public class CreateUserRequestHandlerTests
         _mockJwtService.GenerateJwtToken(Arg.Any<User>())
             .Returns(expectedJwtCredentials);
 
+        // Act
         var result = await _handler.HandleAsync(request);
 
+        // Assert
         result.ShouldNotBeNull();
         result.Email.ShouldBe(email);
         await _mockUnitOfWork.Received(1).Commit();
     }
 }
-

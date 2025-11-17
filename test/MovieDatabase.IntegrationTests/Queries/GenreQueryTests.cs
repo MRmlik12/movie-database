@@ -14,6 +14,7 @@ public class GenreQueryTests(AspireAppHostFixture fixture)
     [Fact]
     public async Task GetGenres_WithoutFilter_ShouldReturnAllGenres()
     {
+        // Arrange
         const string query = """
                                  query {
                                      genres(first: 10) {
@@ -25,7 +26,10 @@ public class GenreQueryTests(AspireAppHostFixture fixture)
                                  }
                              """;
 
+        // Act
         var response = await GraphQLHelper.ExecuteQueryAsync<GenresResponse>(_httpClient, query);
+
+        // Assert
         response.ShouldNotBeNull();
         response.Errors.ShouldBeNull();
         response.Data.ShouldNotBeNull();

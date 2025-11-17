@@ -14,6 +14,7 @@ public class ActorQueryTests(AspireAppHostFixture fixture)
     [Fact]
     public async Task GetActors_WithoutFilter_ShouldReturnAllActors()
     {
+        // Arrange
         const string query = """
                                  query {
                                      actors(first: 10) {
@@ -26,8 +27,10 @@ public class ActorQueryTests(AspireAppHostFixture fixture)
                                  }
                              """;
 
+        // Act
         var response = await GraphQLHelper.ExecuteQueryAsync<ActorsResponse>(_httpClient, query);
 
+        // Assert
         response.ShouldNotBeNull();
         response.Errors.ShouldBeNull();
         response.Data.ShouldNotBeNull();
