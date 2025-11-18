@@ -78,7 +78,7 @@ public class CreateFilmRequestHandlerTests
         Func<Task> act = () => _handler.HandleAsync(request);
 
         // Assert
-        await Assert.ThrowsAsync<FilmExistsApplicationException>(act);
+        await Should.ThrowAsync<FilmExistsApplicationException>(act);
 
         await _mockFilmRepository.DidNotReceive().Add(Arg.Any<Film>());
         await _mockUnitOfWork.DidNotReceive().Commit();

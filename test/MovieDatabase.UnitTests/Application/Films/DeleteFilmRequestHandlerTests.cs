@@ -59,7 +59,7 @@ public class DeleteFilmRequestHandlerTests
         Func<Task> act = () => _handler.HandleAsync(request);
 
         // Assert
-        await Assert.ThrowsAsync<FilmNotExistsApplicationException>(act);
+        await Should.ThrowAsync<FilmNotExistsApplicationException>(act);
 
         await _mockFilmRepository.DidNotReceive().Delete(Arg.Any<Film>());
         await _mockUnitOfWork.DidNotReceive().Commit();

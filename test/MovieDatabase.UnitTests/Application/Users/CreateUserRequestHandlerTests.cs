@@ -92,7 +92,7 @@ public class CreateUserRequestHandlerTests
         Func<Task> act = () => _handler.HandleAsync(request);
 
         // Assert
-        await Assert.ThrowsAsync<DuplicateEmailApplicationException>(act);
+        await Should.ThrowAsync<DuplicateEmailApplicationException>(act);
 
         await _mockUserRepository.DidNotReceive().Add(Arg.Any<User>());
         await _mockUnitOfWork.DidNotReceive().Commit();

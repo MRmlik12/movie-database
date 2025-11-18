@@ -124,39 +124,32 @@ public class JwtServiceTests
         jwtToken.Audiences.ShouldContain(_jwtSettings.Audience);
     }
 
-    [Fact]
-    public void GenerateJwtToken_ShouldIncludeRoleClaim()
+    [Theory]
+    [InlineData(UserRoles.User, nameof(UserRoles.User))]
+    [InlineData(UserRoles.Moderator, nameof(UserRoles.Moderator))]
+    [InlineData(UserRoles.Administrator, nameof(UserRoles.Administrator))]
+    public void GenerateJwtToken_ShouldIncludeRoleClaim(UserRoles role, string expectedRoleName)
     {
         // Arrange
-        var testCases = new[]
+        var user = new User
         {
-            (UserRoles.User, "User"),
-            (UserRoles.Moderator, "Moderator"),
-            (UserRoles.Administrator, "Administrator")
+            Id = Guid.NewGuid(),
+            Name = "TestUser",
+            Email = "test@example.com",
+            Role = role
         };
 
         // Act
-        foreach (var (role, expectedRoleName) in testCases)
-        {
-            var user = new User
-            {
-                Id = Guid.NewGuid(),
-                Name = "TestUser",
-                Email = "test@example.com",
-                Role = role
-            };
+        var (token, _) = _jwtService.GenerateJwtToken(user);
 
-            var (token, _) = _jwtService.GenerateJwtToken(user);
+        var handler = new JwtSecurityTokenHandler();
+        var jwtToken = handler.ReadJwtToken(token);
 
-            var handler = new JwtSecurityTokenHandler();
-            var jwtToken = handler.ReadJwtToken(token);
-
-            // Assert
-            jwtToken.Claims.ShouldContain(c => 
-                c.Type == ClaimTypes.Role && 
-                c.Value == expectedRoleName,
-                $"token should contain role claim for {expectedRoleName}");
-        }
+        // Assert
+        jwtToken.Claims.ShouldContain(c =>
+            c.Type == ClaimTypes.Role &&
+            c.Value == expectedRoleName,
+            $"token should contain role claim for {expectedRoleName}");
     }
 
     [Fact]
@@ -173,7 +166,6 @@ public class JwtServiceTests
 
         // Act
         var (token1, _) = _jwtService.GenerateJwtToken(user);
-        Thread.Sleep(10);
         var (token2, _) = _jwtService.GenerateJwtToken(user);
 
         // Assert
