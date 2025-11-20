@@ -20,7 +20,7 @@ public class JwtServiceTests
             Issuer = "TestIssuer",
             Audience = "TestAudience",
             Key = "ThisIsAVerySecureKeyThatIsAtLeast32CharactersLong!",
-            ExpirationMinutes = 60
+            AccessTokenExpirationMinutes = 60
         };
 
         var options = Options.Create(_jwtSettings);
@@ -40,11 +40,19 @@ public class JwtServiceTests
         };
 
         // Act
-        var (token, expireDate) = _jwtService.GenerateJwtToken(user);
+        var credentials = _jwtService.GenerateJwtToken(user);
 
         // Assert
-        token.ShouldNotBeNullOrEmpty();
-        expireDate.ShouldBeGreaterThan(DateTime.UtcNow);
+        credentials.AccessToken.ShouldNotBeNull();
+        credentials.AccessToken.Token.ShouldNotBeEmpty();
+        credentials.AccessToken.ExpireDate.ShouldBeGreaterThan(DateTime.UtcNow);
+        
+        credentials.RefreshToken.ShouldNotBeNull();
+        credentials.RefreshToken.Token.ShouldNotBeEmpty();
+        credentials.RefreshToken.ExpireDate.ShouldBeGreaterThan(DateTime.UtcNow);
+        
+        credentials.AccessToken.Token.ShouldNotBe(credentials.RefreshToken.Token);
+        credentials.AccessToken.ExpireDate.ShouldNotBeSameAs(credentials.RefreshToken.ExpireDate);
     }
 
     [Fact]
@@ -61,21 +69,28 @@ public class JwtServiceTests
         };
 
         // Act
-        var (token, _) = _jwtService.GenerateJwtToken(user);
+        var token = _jwtService.GenerateJwtToken(user);
 
         // Assert
         var handler = new JwtSecurityTokenHandler();
-        var jwtToken = handler.ReadJwtToken(token);
-
-        jwtToken.Claims.ShouldContain(c => c.Type == JwtRegisteredClaimNames.Jti && c.Value == userId.ToString());
-        jwtToken.Claims.ShouldContain(c => c.Type == JwtRegisteredClaimNames.Sub && c.Value == "TestUser");
-        jwtToken.Claims.ShouldContain(c => c.Type == JwtRegisteredClaimNames.Email && c.Value == "test@example.com");
-        jwtToken.Claims.ShouldContain(c => c.Type == JwtExtendedClaimTypes.Kid);
-        jwtToken.Claims.ShouldContain(c => c.Type == ClaimTypes.Role && c.Value == "User");
+        var jwtAccessToken = handler.ReadJwtToken(token.AccessToken.Token);
+        var jwtRefreshToken = handler.ReadJwtToken(token.RefreshToken.Token);
+        
+        jwtAccessToken.Claims.ShouldContain(c => c.Type == JwtRegisteredClaimNames.Jti && c.Value == userId.ToString());
+        jwtAccessToken.Claims.ShouldContain(c => c.Type == JwtRegisteredClaimNames.Sub && c.Value == "TestUser");
+        jwtAccessToken.Claims.ShouldContain(c => c.Type == JwtRegisteredClaimNames.Email && c.Value == "test@example.com");
+        jwtAccessToken.Claims.ShouldContain(c => c.Type == JwtExtendedClaimTypes.Kid);
+        jwtAccessToken.Claims.ShouldContain(c => c.Type == ClaimTypes.Role && c.Value == "User");
+            
+        jwtRefreshToken.Claims.ShouldContain(c => c.Type == JwtRegisteredClaimNames.Jti && c.Value == userId.ToString());
+        jwtRefreshToken.Claims.ShouldContain(c => c.Type == JwtRegisteredClaimNames.Sub && c.Value == "TestUser");
+        jwtRefreshToken.Claims.ShouldContain(c => c.Type == JwtRegisteredClaimNames.Email && c.Value == "test@example.com");
+        jwtRefreshToken.Claims.ShouldContain(c => c.Type == JwtExtendedClaimTypes.Kid);
+        jwtRefreshToken.Claims.ShouldContain(c => c.Type == ClaimTypes.Role && c.Value == "User");
     }
 
     [Fact]
-    public void GenerateJwtToken_ShouldSetCorrectExpirationTime()
+    public void GenerateJwtToken_AccessTokenShouldSetCorrectExpirationTime()
     {
         // Arrange
         var user = new User
@@ -88,18 +103,42 @@ public class JwtServiceTests
         var beforeGeneration = DateTime.UtcNow;
 
         // Act
-        var (_, expireDate) = _jwtService.GenerateJwtToken(user);
+        var credential = _jwtService.GenerateJwtToken(user);
 
         // Assert
         var afterGeneration = DateTime.UtcNow;
-        var expectedExpiration = beforeGeneration.AddMinutes(_jwtSettings.ExpirationMinutes);
+        var expectedExpiration = beforeGeneration.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes);
         
-        expireDate.ShouldBe(expectedExpiration, TimeSpan.FromSeconds(5));
-        expireDate.ShouldBeGreaterThan(afterGeneration);
+        credential.AccessToken.ExpireDate.ShouldBe(expectedExpiration, TimeSpan.FromSeconds(5));
+        credential.AccessToken.ExpireDate.ShouldBeGreaterThan(afterGeneration);
     }
 
     [Fact]
-    public void GenerateJwtToken_TokenShouldBeDecodable()
+    public void GenerateJwtToken_RefreshTokenShouldSetCorrectExpirationTime()
+    {
+        // Arrange
+        var user = new User
+        {
+            Id = Guid.NewGuid(),
+            Name = "TestUser",
+            Email = "test@example.com",
+            Role = UserRoles.User
+        };
+        var beforeGeneration = DateTime.UtcNow;
+
+        // Act
+        var credential = _jwtService.GenerateJwtToken(user);
+
+        // Assert
+        var afterGeneration = DateTime.UtcNow;
+        var expectedExpiration = beforeGeneration.AddDays(_jwtSettings.RefreshTokenExpirationDays);
+        
+        credential.RefreshToken.ExpireDate.ShouldBe(expectedExpiration, TimeSpan.FromSeconds(5));
+        credential.RefreshToken.ExpireDate.ShouldBeGreaterThan(afterGeneration);
+    }
+    
+    [Fact]
+    public void GenerateJwtToken_AccessTokenShouldBeDecodable()
     {
         // Arrange
         var user = new User
@@ -111,17 +150,28 @@ public class JwtServiceTests
         };
 
         // Act
-        var (token, _) = _jwtService.GenerateJwtToken(user);
+        var credentials = _jwtService.GenerateJwtToken(user);
 
         // Assert
         var handler = new JwtSecurityTokenHandler();
-        var canRead = handler.CanReadToken(token);
-        canRead.ShouldBeTrue();
+        
+        var canReadAccessToken = handler.CanReadToken(credentials.AccessToken.Token);
+        canReadAccessToken.ShouldBeTrue();
 
-        var jwtToken = handler.ReadJwtToken(token);
-        jwtToken.ShouldNotBeNull();
-        jwtToken.Issuer.ShouldBe(_jwtSettings.Issuer);
-        jwtToken.Audiences.ShouldContain(_jwtSettings.Audience);
+        var accessJwtToken = handler.ReadJwtToken(credentials.AccessToken.Token);
+        
+        accessJwtToken.ShouldNotBeNull();
+        accessJwtToken.Issuer.ShouldBe(_jwtSettings.Issuer);
+        accessJwtToken.Audiences.ShouldContain(_jwtSettings.Audience);
+        
+        var canReadRefreshToken = handler.CanReadToken(credentials.RefreshToken.Token);
+        canReadRefreshToken.ShouldBeTrue();
+
+        var refreshJwtToken = handler.ReadJwtToken(credentials.RefreshToken.Token);
+        
+        refreshJwtToken.ShouldNotBeNull();
+        refreshJwtToken.Issuer.ShouldBe(_jwtSettings.Issuer);
+        refreshJwtToken.Audiences.ShouldContain(_jwtSettings.Audience);
     }
 
     [Theory]
@@ -140,10 +190,10 @@ public class JwtServiceTests
         };
 
         // Act
-        var (token, _) = _jwtService.GenerateJwtToken(user);
+        var credentials = _jwtService.GenerateJwtToken(user);
 
         var handler = new JwtSecurityTokenHandler();
-        var jwtToken = handler.ReadJwtToken(token);
+        var jwtToken = handler.ReadJwtToken(credentials.AccessToken.Token);
 
         // Assert
         jwtToken.Claims.ShouldContain(c =>
@@ -165,11 +215,11 @@ public class JwtServiceTests
         };
 
         // Act
-        var (token1, _) = _jwtService.GenerateJwtToken(user);
-        var (token2, _) = _jwtService.GenerateJwtToken(user);
+        var credentials1 = _jwtService.GenerateJwtToken(user);
+        var credentials2 = _jwtService.GenerateJwtToken(user);
 
         // Assert
-        token1.ShouldNotBe(token2, "each token generation should produce a unique token");
+        credentials1.ShouldNotBe(credentials2, "Each token generation should produce a unique token");
     }
 
     [Fact]
@@ -193,17 +243,23 @@ public class JwtServiceTests
         };
 
         // Act
-        var (token1, _) = _jwtService.GenerateJwtToken(user1);
-        var (token2, _) = _jwtService.GenerateJwtToken(user2);
+        var credentials1 = _jwtService.GenerateJwtToken(user1);
+        var credentials2 = _jwtService.GenerateJwtToken(user2);
 
         // Assert
-        token1.ShouldNotBe(token2);
+        credentials1.ShouldNotBe(credentials2);
 
         var handler = new JwtSecurityTokenHandler();
-        var jwtToken1 = handler.ReadJwtToken(token1);
-        var jwtToken2 = handler.ReadJwtToken(token2);
+        var jwtToken1 = handler.ReadJwtToken(credentials1.AccessToken.Token);
+        var jwtToken2 = handler.ReadJwtToken(credentials2.AccessToken.Token);
+
+        var jwtAccessToken1 = handler.ReadJwtToken(credentials1.RefreshToken.Token);
+        var jwtAccessToken2 = handler.ReadJwtToken(credentials2.RefreshToken.Token);
 
         jwtToken1.Subject.ShouldBe("User1");
         jwtToken2.Subject.ShouldBe("User2");
+        
+        jwtAccessToken1.Subject.ShouldBe("User1");
+        jwtAccessToken2.Subject.ShouldBe("User2");
     }
 }

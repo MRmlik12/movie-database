@@ -4,6 +4,8 @@ namespace MovieDatabase.Api.Infrastructure.Db.Repositories;
 
 public interface IUserRepository
 {
-    Task Add(User user);
+    void Add(User user);
     Task<User?> GetByEmail(string email);
+    Task<User?> GetById(string id);
+    Task<User?> FindUserToRevokeToken(string userId, string accessToken, string refreshToken);
 }

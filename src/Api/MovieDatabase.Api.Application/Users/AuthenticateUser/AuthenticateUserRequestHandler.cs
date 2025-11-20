@@ -7,7 +7,7 @@ using MovieDatabase.Api.Infrastructure.Db.Repositories;
 
 namespace MovieDatabase.Api.Application.Users.AuthenticateUser;
 
-public class AuthenticateUserRequestHandler(IUserRepository userRepository, IJwtService jwtService) : IRequestHandler<AuthenticateUserRequest, UserCredentialsDto>
+public sealed class AuthenticateUserRequestHandler(IUserRepository userRepository, IJwtService jwtService) : IRequestHandler<AuthenticateUserRequest, UserCredentialsDto>
 {
     public async Task<UserCredentialsDto> HandleAsync(AuthenticateUserRequest request)
     {
@@ -24,12 +24,15 @@ public class AuthenticateUserRequestHandler(IUserRepository userRepository, IJwt
             throw new InvalidUserCredentialsApplicationException();
         }
 
-        var (token, expireDate) = jwtService.GenerateJwtToken(user);
+        var credentials = jwtService.GenerateJwtToken(user);
         var userDto = UserCredentialsDto.From(user);
 
-        userDto.Token = token;
-        userDto.ExpireTime = expireDate;
-
+        userDto.Token = credentials.AccessToken.Token;
+        userDto.ExpireTime = credentials.AccessToken.ExpireDate;
+        
+        userDto.RefreshToken = credentials.RefreshToken.Token;
+        userDto.RefreshTokenExpireTime = credentials.RefreshToken.ExpireDate;
+        
         return userDto;
     }
 }

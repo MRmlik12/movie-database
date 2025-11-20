@@ -29,6 +29,7 @@ builder.Services
     })
     .AddTypeExtension<FilmMutations>()
     .AddTypeExtension<UserMutations>()
+    .AddTypeExtension<TokenMutations>()
     .AddQueryType<Query>();
 
 

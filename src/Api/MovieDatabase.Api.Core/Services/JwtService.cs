@@ -17,7 +17,7 @@ public class JwtService(IOptions<JwtSettings> options) : IJwtService
     public JwtCredential GenerateJwtToken(User user)
     {
         var now = DateTime.UtcNow;
-        var expires = now.AddMinutes(_settings.ExpirationMinutes);
+        var accessTokenExpires = now.AddMinutes(_settings.AccessTokenExpirationMinutes);
 
         var claims = new List<Claim>
         {
@@ -35,12 +35,27 @@ public class JwtService(IOptions<JwtSettings> options) : IJwtService
             issuer: _settings.Issuer,
             audience: _settings.Audience,
             claims: claims,
-            expires: expires,
+            expires: accessTokenExpires,
+            signingCredentials: creds
+        );
+        
+        var generatedAccessToken = new JwtSecurityTokenHandler().WriteToken(token);
+        
+        var refreshTokenExpires = now.AddDays(_settings.RefreshTokenExpirationDays);
+        
+        var refreshToken = new JwtSecurityToken(
+            issuer: _settings.Issuer,
+            audience: _settings.Audience,
+            claims: claims,
+            expires: refreshTokenExpires,
             signingCredentials: creds
         );
 
-        var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+        var generatedRefreshToken = new JwtSecurityTokenHandler().WriteToken(refreshToken);
 
-        return new JwtCredential(tokenString, expires);
+        return new JwtCredential(
+            new JwtCredential.JwtToken(generatedAccessToken, accessTokenExpires),
+            new JwtCredential.JwtToken(generatedRefreshToken, refreshTokenExpires)
+        );
     }
 }

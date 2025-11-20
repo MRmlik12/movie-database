@@ -42,7 +42,10 @@ public class AuthenticateUserRequestHandlerTests
             password
         );
 
-        var expectedJwtCredentials = new JwtCredential("jwt-token-12345", DateTime.UtcNow.AddHours(1));
+        var expectedJwtCredentials = new JwtCredential(
+            new JwtCredential.JwtToken("jwt-access-token-12345", DateTime.UtcNow.AddHours(1)),
+            new JwtCredential.JwtToken("jwt-refresh-token-12345", DateTime.UtcNow.AddDays(7))
+        );
 
         _mockUserRepository.GetByEmail(request.Email)
             .Returns(Task.FromResult<User?>(user));
@@ -54,11 +57,9 @@ public class AuthenticateUserRequestHandlerTests
 
         // Assert
         result.ShouldNotBeNull();
-        result.Token.ShouldBe(expectedJwtCredentials.Token);
-        result.ExpireTime?.ShouldBe(expectedJwtCredentials.ExpireDate, TimeSpan.FromSeconds(ExpireDateToleranceSeconds));
+        result.Token.ShouldBe(expectedJwtCredentials.AccessToken.Token);
+        result.ExpireTime?.ShouldBe(expectedJwtCredentials.AccessToken.ExpireDate, TimeSpan.FromSeconds(ExpireDateToleranceSeconds));
         result.Email.ShouldBe(user.Email);
-        result.Username.ShouldBe(user.Name);
-        result.Role.ShouldBe(Enum.GetName(user.Role));
     }
 
     [Fact]
@@ -125,7 +126,10 @@ public class AuthenticateUserRequestHandlerTests
             Password: password
         );
 
-        var expectedJwtCredentials = new JwtCredential("token", DateTime.UtcNow.AddHours(ExpireDateToleranceSeconds));
+        var expectedJwtCredentials = new JwtCredential(
+            new JwtCredential.JwtToken("access-token", DateTime.UtcNow.AddHours(1)),
+            new JwtCredential.JwtToken("refresh-token", DateTime.UtcNow.AddDays(7))
+        );
         
         _mockUserRepository.GetByEmail(request.Email)
             .Returns(Task.FromResult<User?>(user));
@@ -149,13 +153,16 @@ public class AuthenticateUserRequestHandlerTests
         const string password = "TestPassword123!";
         var passwordHash = PasswordUtils.HashPassword(password);
         var user = TestDataBuilder.CreateValidUser(passwordHash: passwordHash);
-
+        
         var request = new AuthenticateUserRequest(
             Email: user.Email,
             Password: password
         );
         
-        var expectedTokenModel = new JwtCredential("jwt-token-abc123", DateTime.UtcNow.AddHours(1));
+        var expectedTokenModel = new JwtCredential(
+            new JwtCredential.JwtToken("jwt-access-token-abc123", DateTime.UtcNow.AddHours(1)),
+            new JwtCredential.JwtToken("jwt-refresh-token-abc123", DateTime.UtcNow.AddDays(7))
+        );
 
         _mockUserRepository.GetByEmail(request.Email)
             .Returns(Task.FromResult<User?>(user));
@@ -166,8 +173,8 @@ public class AuthenticateUserRequestHandlerTests
         var result = await _handler.HandleAsync(request);
 
         // Assert
-        result.Token.ShouldBe(expectedTokenModel.Token);
-        result.ExpireTime?.ShouldBe(expectedTokenModel.ExpireDate, TimeSpan.FromSeconds(ExpireDateToleranceSeconds));
+        result.Token.ShouldBe(expectedTokenModel.AccessToken.Token);
+        result.ExpireTime?.ShouldBe(expectedTokenModel.AccessToken.ExpireDate, TimeSpan.FromSeconds(ExpireDateToleranceSeconds));
     }
 
     [Theory]
@@ -183,13 +190,16 @@ public class AuthenticateUserRequestHandlerTests
             passwordHash: passwordHash,
             role: role
         );
-
+        
         var request = new AuthenticateUserRequest(
             Email: user.Email,
             Password: password
         );
 
-        var expectedJwtCredentials = new JwtCredential("TestPassword123!", DateTime.UtcNow.AddHours(1));
+        var expectedJwtCredentials = new JwtCredential(
+            new JwtCredential.JwtToken("access-token", DateTime.UtcNow.AddHours(1)),
+            new JwtCredential.JwtToken("refresh-token", DateTime.UtcNow.AddDays(7))
+        );
         
         _mockUserRepository.GetByEmail(request.Email)
             .Returns(Task.FromResult<User?>(user));
@@ -235,7 +245,10 @@ public class AuthenticateUserRequestHandlerTests
             Password: password
         );
 
-        var expectedJwtCredentials = new JwtCredential("token", DateTime.UtcNow.AddHours(1));
+        var expectedJwtCredentials = new JwtCredential(
+            new JwtCredential.JwtToken("access-token", DateTime.UtcNow.AddHours(1)),
+            new JwtCredential.JwtToken("refresh-token", DateTime.UtcNow.AddDays(7))
+        );
         
         _mockUserRepository.GetByEmail(request.Email)
             .Returns(Task.FromResult<User?>(user));

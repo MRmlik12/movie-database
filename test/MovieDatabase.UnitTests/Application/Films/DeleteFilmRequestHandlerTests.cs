@@ -40,7 +40,7 @@ public class DeleteFilmRequestHandlerTests
 
         // Assert
         result.ShouldBe(filmIdString);
-        await _mockFilmRepository.Received(1).Delete(Arg.Is<Film>(f => f.Id == filmId));
+        _mockFilmRepository.Received(1).Delete(Arg.Is<Film>(f => f.Id == filmId));
         await _mockUnitOfWork.Received(1).Commit();
     }
 
@@ -61,7 +61,7 @@ public class DeleteFilmRequestHandlerTests
         // Assert
         await Should.ThrowAsync<FilmNotExistsApplicationException>(act);
 
-        await _mockFilmRepository.DidNotReceive().Delete(Arg.Any<Film>());
+        _mockFilmRepository.DidNotReceive().Delete(Arg.Any<Film>());
         await _mockUnitOfWork.DidNotReceive().Commit();
     }
 
@@ -82,7 +82,7 @@ public class DeleteFilmRequestHandlerTests
         await _handler.HandleAsync(request);
 
         // Assert
-        await _mockFilmRepository.Received(1).Delete(Arg.Any<Film>());
+        _mockFilmRepository.Received(1).Delete(Arg.Any<Film>());
         await _mockFilmRepository.Received(1).GetById(filmIdString);
         await _mockUnitOfWork.Received(1).Commit();
     }
@@ -130,7 +130,7 @@ public class DeleteFilmRequestHandlerTests
 
         // Assert
         result.ShouldBe(guidString);
-        await _mockFilmRepository.Received(1).Delete(Arg.Is<Film>(f => f.Id == filmId));
+        _mockFilmRepository.Received(1).Delete(Arg.Is<Film>(f => f.Id == filmId));
         await _mockUnitOfWork.Received(1).Commit();
     }
 }

@@ -35,7 +35,7 @@ public class CreateFilmRequestHandlerTests
 
         // Assert
         result.ShouldNotBeNull();
-        await _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
+        _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
             f.Title == request.Title &&
             f.ReleaseDate == request.ReleaseDate));
         await _mockUnitOfWork.Received(1).Commit();
@@ -80,7 +80,7 @@ public class CreateFilmRequestHandlerTests
         // Assert
         await Should.ThrowAsync<FilmExistsApplicationException>(act);
 
-        await _mockFilmRepository.DidNotReceive().Add(Arg.Any<Film>());
+        _mockFilmRepository.DidNotReceive().Add(Arg.Any<Film>());
         await _mockUnitOfWork.DidNotReceive().Commit();
     }
 
@@ -105,7 +105,7 @@ public class CreateFilmRequestHandlerTests
         await _handler.HandleAsync(request);
 
         // Assert
-        await _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
+        _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
             f.Title == "Test Film" &&
             !f.Title.StartsWith(" ") &&
             !f.Title.EndsWith(" ")));
@@ -124,7 +124,7 @@ public class CreateFilmRequestHandlerTests
         await _handler.HandleAsync(request);
 
         // Assert
-        await _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
+        _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
             f.Description == "Test Description" &&
             !f.Description.StartsWith(" ") &&
             !f.Description.EndsWith(" ")));
@@ -143,7 +143,7 @@ public class CreateFilmRequestHandlerTests
         await _handler.HandleAsync(request);
 
         // Assert
-        await _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
+        _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
             f.Description == string.Empty));
         await _mockUnitOfWork.Received(1).Commit();
     }
@@ -173,7 +173,7 @@ public class CreateFilmRequestHandlerTests
         await _handler.HandleAsync(request);
 
         // Assert
-        await _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
+        _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
             f.Actors.Count == 2 &&
             f.Actors[0].Name == "John" &&
             f.Actors[0].Surname == "Doe" &&
@@ -207,7 +207,7 @@ public class CreateFilmRequestHandlerTests
         await _handler.HandleAsync(request);
 
         // Assert
-        await _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
+        _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
             f.Genres.Count == 2 &&
             f.Genres[0].Name == "Drama" &&
             f.Genres[1].Name == "Thriller"));
@@ -226,7 +226,7 @@ public class CreateFilmRequestHandlerTests
         await _handler.HandleAsync(request);
 
         // Assert
-        await _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
+        _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
             f.Director.Name == request.Director.Name &&
             f.Director.Surname == request.Director.Surname));
         await _mockUnitOfWork.Received(1).Commit();
@@ -244,7 +244,7 @@ public class CreateFilmRequestHandlerTests
         await _handler.HandleAsync(request);
 
         // Assert
-        await _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
+        _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
             f.Producer.Name == request.Producer.Name));
         await _mockUnitOfWork.Received(1).Commit();
     }
@@ -262,7 +262,7 @@ public class CreateFilmRequestHandlerTests
         await _handler.HandleAsync(request);
 
         // Assert
-        await _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
+        _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
             f.CreatorId == creatorId));
         await _mockUnitOfWork.Received(1).Commit();
     }
@@ -279,7 +279,7 @@ public class CreateFilmRequestHandlerTests
         await _handler.HandleAsync(request);
 
         // Assert
-        await _mockFilmRepository.Received(1).Add(Arg.Any<Film>());
+        _mockFilmRepository.Received(1).Add(Arg.Any<Film>());
         await _mockFilmRepository.Received(1).GetByTitle(Arg.Any<string>());
         await _mockUnitOfWork.Received(1).Commit();
     }

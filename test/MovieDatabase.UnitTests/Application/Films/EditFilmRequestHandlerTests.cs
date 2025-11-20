@@ -40,7 +40,7 @@ public class EditFilmRequestHandlerTests
         // Assert
         result.ShouldNotBeNull();
         result.Title.ShouldBe(request.Title);
-        await _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
+        _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
             f.Id == filmId &&
             f.Title == request.Title));
         await _mockUnitOfWork.Received(1).Commit();
@@ -62,7 +62,7 @@ public class EditFilmRequestHandlerTests
         // Assert
         await Should.ThrowAsync<FilmNotExistsApplicationException>(act);
 
-        await _mockFilmRepository.DidNotReceive().Add(Arg.Any<Film>());
+        _mockFilmRepository.DidNotReceive().Add(Arg.Any<Film>());
         await _mockUnitOfWork.DidNotReceive().Commit();
     }
 
@@ -102,7 +102,7 @@ public class EditFilmRequestHandlerTests
         await _handler.HandleAsync(request);
 
         // Assert
-        await _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
+        _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
             f.Title == "New Title" &&
             f.Description == "New Description" &&
             f.ReleaseDate == new DateOnly(2025, 1, 1) &&
@@ -131,7 +131,7 @@ public class EditFilmRequestHandlerTests
         await _handler.HandleAsync(request);
 
         // Assert
-        await _mockFilmRepository.Received(1).Add(Arg.Any<Film>());
+        _mockFilmRepository.Received(1).Add(Arg.Any<Film>());
         await _mockFilmRepository.Received(1).GetById(filmIdString);
         await _mockUnitOfWork.Received(1).Commit();
     }
@@ -199,7 +199,7 @@ public class EditFilmRequestHandlerTests
         await _handler.HandleAsync(request);
 
         // Assert
-        await _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
+        _mockFilmRepository.Received(1).Add(Arg.Is<Film>(f =>
             f.Actors[0].Id == Guid.Parse(actorId) &&
             f.Genres[0].Id == Guid.Parse(genreId) &&
             f.Director.Id == Guid.Parse(directorId) &&

@@ -20,4 +20,4 @@ var apiService = builder.AddProject<Projects.MovieDatabase_Api>(ApiConfiguration
 
 builder.Build().Run();
 
-public partial class Program { }
+public partial class Program;
