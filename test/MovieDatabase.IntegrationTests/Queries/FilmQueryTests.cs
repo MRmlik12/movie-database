@@ -15,18 +15,7 @@ public class FilmQueryTests(AspireAppHostFixture fixture)
     public async Task GetFilms_WithoutFilter_ShouldReturnAllFilms()
     {
         // Arrange
-        const string query = """
-                                 query {
-                                     films(first: 10) {
-                                         nodes {
-                                             id
-                                             title
-                                             description
-                                             releaseDate
-                                         }
-                                     }
-                                 }
-                             """;
+        var query = GraphQLHelper.LoadQueryFromFile("Graphql/Queries/GetFilms.graphql");
 
         // Act
         var response = await GraphQLHelper.ExecuteQueryAsync<FilmsResponse>(_httpClient, query);
@@ -44,34 +33,7 @@ public class FilmQueryTests(AspireAppHostFixture fixture)
     public async Task GetFilms_ShouldIncludeActorsAndDirectors()
     {
         // Arrange
-        const string query = """
-                                 query {
-                                     films(first: 10) {
-                                         nodes {
-                                             id
-                                             title
-                                             actors {
-                                                 id
-                                                 name
-                                                 surname
-                                             }
-                                             director {
-                                                 id
-                                                 name
-                                                 surname
-                                             }
-                                             genres {
-                                                 id
-                                                 name
-                                             }
-                                             producer {
-                                                 id
-                                                 name
-                                             }
-                                         }
-                                     }
-                                 }
-                             """;
+        var query = GraphQLHelper.LoadQueryFromFile("Graphql/Queries/GetFilmsWithDetails.graphql");
 
         // Act
         var response = await GraphQLHelper.ExecuteQueryAsync<FilmsResponse>(_httpClient, query);

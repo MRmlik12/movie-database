@@ -15,16 +15,7 @@ public class ProducerQueryTests(AspireAppHostFixture fixture)
     public async Task GetProducers_WithoutFilter_ShouldReturnAllProducers()
     {
         // Arrange
-        const string query = """
-                                 query {
-                                     producers(first: 10) {
-                                         nodes {
-                                             id
-                                             name
-                                         }
-                                     }
-                                 }
-                             """;
+        var query = GraphQLHelper.LoadQueryFromFile("Graphql/Queries/GetProducers.graphql");
 
         // Act
         var response = await GraphQLHelper.ExecuteQueryAsync<ProducersResponse>(_httpClient, query);

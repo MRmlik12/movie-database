@@ -15,17 +15,7 @@ public class ActorQueryTests(AspireAppHostFixture fixture)
     public async Task GetActors_WithoutFilter_ShouldReturnAllActors()
     {
         // Arrange
-        const string query = """
-                                 query {
-                                     actors(first: 10) {
-                                         nodes {
-                                             id
-                                             name
-                                             surname
-                                         }
-                                     }
-                                 }
-                             """;
+        var query = GraphQLHelper.LoadQueryFromFile("Graphql/Queries/GetActors.graphql");
 
         // Act
         var response = await GraphQLHelper.ExecuteQueryAsync<ActorsResponse>(_httpClient, query);

@@ -65,4 +65,17 @@ public static class GraphQLHelper
     {
         return await ExecuteQueryAsync<T>(client, mutation, variables);
     }
+
+    public static string LoadQueryFromFile(string relativePath)
+    {
+        var baseDir = AppContext.BaseDirectory;
+        var fullPath = Path.Combine(baseDir, relativePath.Replace('/', Path.DirectorySeparatorChar));
+
+        if (!File.Exists(fullPath))
+        {
+            throw new FileNotFoundException($"GraphQL file not found: {fullPath}");
+        }
+
+        return File.ReadAllText(fullPath);
+    }
 }

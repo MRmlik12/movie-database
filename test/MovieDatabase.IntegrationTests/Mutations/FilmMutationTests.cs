@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Headers;
+﻿using System.Net;
+using System.Net.Http.Headers;
 
 using MovieDatabase.Api.Application.Films.CreateFilm;
 using MovieDatabase.Api.Application.Films.EditFilm;
@@ -21,14 +22,7 @@ public class FilmMutationTests(AspireAppHostFixture fixture)
     public async Task CreateFilm_WithoutAuthentication_ShouldReturnUnauthorized()
     {
         // Arrange
-        const string mutation = """
-                                    mutation CreateFilm($input: CreateFilmInput!) {
-                                        createFilm(input: $input) {
-                                            id
-                                            title
-                                        }
-                                    }
-                                """;
+        var mutation = GraphQLHelper.LoadQueryFromFile("Graphql/Mutations/CreateFilm.graphql");
 
         var input = new CreateFilmInput(
             Title: "Test Movie",
@@ -50,7 +44,7 @@ public class FilmMutationTests(AspireAppHostFixture fixture)
         var hasAuthError = content.Contains("authorize", StringComparison.OrdinalIgnoreCase) ||
                           content.Contains("authenticated", StringComparison.OrdinalIgnoreCase) ||
                           content.Contains("unauthorized", StringComparison.OrdinalIgnoreCase) ||
-                          response.StatusCode == System.Net.HttpStatusCode.Unauthorized;
+                          response.StatusCode == HttpStatusCode.Unauthorized;
         hasAuthError.ShouldBeTrue($"Expected authorization error but got: {content}");
     }
 
@@ -63,16 +57,7 @@ public class FilmMutationTests(AspireAppHostFixture fixture)
         var client = fixture.CreateHttpClient("movies-db-api");
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        const string mutation = """
-                                    mutation CreateFilm($input: CreateFilmInput!) {
-                                        createFilm(input: $input) {
-                                            id
-                                            title
-                                            releaseDate
-                                            description
-                                        }
-                                    }
-                                """;
+        var mutation = GraphQLHelper.LoadQueryFromFile("Graphql/Mutations/CreateFilm.graphql");
 
         var input = new CreateFilmInput(
             Title: $"Integration Test Movie {Guid.NewGuid():N}",
@@ -115,14 +100,7 @@ public class FilmMutationTests(AspireAppHostFixture fixture)
         var client = fixture.CreateHttpClient("movies-db-api");
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
 
-        const string createMutation = """
-                                          mutation CreateFilm($input: CreateFilmInput!) {
-                                              createFilm(input: $input) {
-                                                  id
-                                                  title
-                                              }
-                                          }
-                                      """;
+        var createMutation = GraphQLHelper.LoadQueryFromFile("Graphql/Mutations/CreateFilm.graphql");
 
         var createInput = new CreateFilmInput(
             Title: $"Film to Edit {Guid.NewGuid():N}",
@@ -139,7 +117,7 @@ public class FilmMutationTests(AspireAppHostFixture fixture)
             client, createMutation, new { input = createInput });
 
         // Assert
-        if (createResponse?.Errors != null && createResponse.Errors.Length > 0)
+        if (createResponse?.Errors is { Length: > 0 })
         {
             var errorMsg = string.Join(", ", createResponse.Errors.Select(e => e.Message));
             throw new Exception($"Failed to create film for editing test: {errorMsg}");
@@ -151,15 +129,7 @@ public class FilmMutationTests(AspireAppHostFixture fixture)
         createResponse.Data.CreateFilm.Id.ShouldNotBeNull();
         var filmId = createResponse.Data.CreateFilm.Id;
 
-        const string editMutation = """
-                                        mutation EditFilm($input: EditFilmInput!) {
-                                            editFilm(input: $input) {
-                                                id
-                                                title
-                                                description
-                                            }
-                                        }
-                                    """;
+        var editMutation = GraphQLHelper.LoadQueryFromFile("Graphql/Mutations/EditFilm.graphql");
 
         var editInput = new EditFilmInput(
             Id: filmId,
@@ -194,14 +164,7 @@ public class FilmMutationTests(AspireAppHostFixture fixture)
         var client = fixture.CreateHttpClient("movies-db-api");
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        const string createMutation = """
-                                          mutation CreateFilm($input: CreateFilmInput!) {
-                                              createFilm(input: $input) {
-                                                  id
-                                                  title
-                                              }
-                                          }
-                                      """;
+        var createMutation = GraphQLHelper.LoadQueryFromFile("Graphql/Mutations/CreateFilm.graphql");
 
         var createInput = new CreateFilmInput(
             Title: $"Film to Delete {Guid.NewGuid():N}",
@@ -218,7 +181,7 @@ public class FilmMutationTests(AspireAppHostFixture fixture)
             client, createMutation, new { input = createInput });
 
         // Assert
-        if (createResponse?.Errors != null && createResponse.Errors.Length > 0)
+        if (createResponse?.Errors is { Length: > 0 })
         {
             var errorMsg = string.Join(", ", createResponse.Errors.Select(e => e.Message));
             throw new Exception($"Failed to create film for deletion test: {errorMsg}");
@@ -230,11 +193,7 @@ public class FilmMutationTests(AspireAppHostFixture fixture)
         createResponse.Data.CreateFilm.Id.ShouldNotBeNull();
         var filmId = createResponse.Data.CreateFilm.Id;
 
-        const string deleteMutation = """
-                                          mutation DeleteFilm($filmId: String!) {
-                                              deleteFilm(filmId: $filmId)
-                                          }
-                                      """;
+        var deleteMutation = GraphQLHelper.LoadQueryFromFile("Graphql/Mutations/DeleteFilm.graphql");
 
         var deleteVariables = new { filmId };
 
@@ -251,17 +210,7 @@ public class FilmMutationTests(AspireAppHostFixture fixture)
 
     private async Task<string> GetAdminTokenAsync()
     {
-        const string loginMutation = """
-                                         mutation LoginUser($request: AuthenticateUserRequestInput!) {
-                                             loginUser(request: $request) {
-                                                 token
-                                                 id
-                                                 username
-                                                 email
-                                                 role
-                                             }
-                                         }
-                                     """;
+        var loginMutation = GraphQLHelper.LoadQueryFromFile("Graphql/Mutations/LoginUser.graphql");
 
         var request = new AuthenticateUserRequest(
             Email: "admin@example.com",

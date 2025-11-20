@@ -15,17 +15,7 @@ public class DirectorQueryTests(AspireAppHostFixture fixture)
     public async Task GetDirectors_WithoutFilter_ShouldReturnAllDirectors()
     {
         // Arrange
-        const string query = """
-                                 query {
-                                     directors(first: 10) {
-                                         nodes {
-                                             id
-                                             name
-                                             surname
-                                         }
-                                     }
-                                 }
-                             """;
+        var query = GraphQLHelper.LoadQueryFromFile("Graphql/Queries/GetDirectors.graphql");
 
         // Act
         var response = await GraphQLHelper.ExecuteQueryAsync<DirectorsResponse>(_httpClient, query);

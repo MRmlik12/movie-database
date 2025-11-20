@@ -17,14 +17,7 @@ public class UserMutationTests(AspireAppHostFixture fixture)
     public async Task RegisterUser_WithValidData_ShouldReturnCredentials()
     {
         // Arrange
-        const string mutation = """
-                                    mutation RegisterUser($request: CreateUserRequestInput!) {
-                                        registerUser(request: $request) {
-                                            token
-                                            expireTime
-                                        }
-                                    }
-                                """;
+        var mutation = GraphQLHelper.LoadQueryFromFile("Graphql/Mutations/RegisterUser.graphql");
 
         var request = new CreateUserRequest(
             $"testuser_{Guid.NewGuid():N}",
@@ -54,13 +47,7 @@ public class UserMutationTests(AspireAppHostFixture fixture)
         // Arrange
         var email = $"duplicate_{Guid.NewGuid():N}@example.com";
 
-        const string mutation = """
-                                    mutation RegisterUser($request: CreateUserRequestInput!) {
-                                        registerUser(request: $request) {
-                                            token
-                                        }
-                                    }
-                                """;
+        var mutation = GraphQLHelper.LoadQueryFromFile("Graphql/Mutations/RegisterUser.graphql");
 
         var request1 = new CreateUserRequest(
             "user1",
@@ -95,14 +82,6 @@ public class UserMutationTests(AspireAppHostFixture fixture)
         var email = $"logintest_{Guid.NewGuid():N}@example.com";
         const string password = "SecurePassword123!";
 
-        const string registerMutation = """
-                                            mutation RegisterUser($request: CreateUserRequestInput!) {
-                                                registerUser(request: $request) {
-                                                    token
-                                                }
-                                            }
-                                        """;
-
         var registerRequest = new CreateUserRequest(
             $"loginuser_{Guid.NewGuid():N}",
             email,
@@ -110,17 +89,13 @@ public class UserMutationTests(AspireAppHostFixture fixture)
         );
 
         // Act
+        var registerMutation = GraphQLHelper.LoadQueryFromFile("Graphql/Mutations/RegisterUser.graphql");
+
+        // Act
         await GraphQLHelper.ExecuteMutationAsync<RegisterUserResponse>(
             _httpClient, registerMutation, new { request = registerRequest });
 
-        const string loginMutation = """
-                                         mutation LoginUser($request: AuthenticateUserRequestInput!) {
-                                             loginUser(request: $request) {
-                                                 token
-                                                 expireTime
-                                             }
-                                         }
-                                     """;
+        var loginMutation = GraphQLHelper.LoadQueryFromFile("Graphql/Mutations/LoginUser.graphql");
 
         var loginRequest = new AuthenticateUserRequest(
             email,
@@ -142,13 +117,7 @@ public class UserMutationTests(AspireAppHostFixture fixture)
     public async Task LoginUser_WithInvalidCredentials_ShouldReturnError()
     {
         // Arrange
-        const string mutation = """
-                                    mutation LoginUser($request: AuthenticateUserRequestInput!) {
-                                        loginUser(request: $request) {
-                                            token
-                                        }
-                                    }
-                                """;
+        var mutation = GraphQLHelper.LoadQueryFromFile("Graphql/Mutations/LoginUser.graphql");
 
         var request = new AuthenticateUserRequest(
             "nonexistent@example.com",
