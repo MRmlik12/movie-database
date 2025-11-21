@@ -11,7 +11,6 @@ namespace MovieDatabase.Api.Application.Users.CreateUser;
 
 public sealed class CreateUserRequestHandler(
     IUserRepository userRepository,
-    IUnitOfWork unitOfWork,
     IJwtService jwtService
 ) : IRequestHandler<CreateUserRequest, UserCredentialsDto>
 {
@@ -31,9 +30,16 @@ public sealed class CreateUserRequestHandler(
             Role = UserRoles.User
         };
 
-        userRepository.Add(user);
-
         var credentials = jwtService.GenerateJwtToken(user);
+        
+        user.Tokens.Add(new ClaimToken
+        {
+            AccessToken = HashUtils.ComputeHash(credentials.AccessToken.Token),
+            RefreshToken = HashUtils.ComputeHash(credentials.RefreshToken.Token),
+            ExpiresAt = credentials.RefreshToken.ExpireDate,
+            CreatedAt = DateTime.UtcNow,
+            IsRevoked = false
+        });
 
         var userDto = UserCredentialsDto.From(user);
 
@@ -43,8 +49,8 @@ public sealed class CreateUserRequestHandler(
         userDto.RefreshToken = credentials.RefreshToken.Token;
         userDto.RefreshTokenExpireTime = credentials.RefreshToken.ExpireDate;
 
-        await unitOfWork.Commit();
-
+        userRepository.Add(user);
+        
         return userDto;
     }
 }

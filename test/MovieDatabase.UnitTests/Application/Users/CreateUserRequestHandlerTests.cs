@@ -25,7 +25,7 @@ public class CreateUserRequestHandlerTests
         _mockUserRepository = Substitute.For<IUserRepository>();
         _mockUnitOfWork = Substitute.For<IUnitOfWork>();
         _mockJwtService = Substitute.For<IJwtService>();
-        _handler = new CreateUserRequestHandler(_mockUserRepository, _mockUnitOfWork, _mockJwtService);
+        _handler = new CreateUserRequestHandler(_mockUserRepository, _mockJwtService);
     }
 
     [Fact]

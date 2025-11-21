@@ -14,6 +14,26 @@ public class JwtService(IOptions<JwtSettings> options) : IJwtService
 {
     private readonly JwtSettings _settings = options.Value;
 
+    public ClaimsPrincipal ReadPrincipalFromExpiredToken(string token)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.UTF8.GetBytes(_settings.Key);
+
+        var validationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            RequireExpirationTime = true,
+            ValidIssuer = _settings.Issuer,
+            ValidAudience = _settings.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            RoleClaimType = ClaimTypes.Role
+        };
+
+        return tokenHandler.ValidateToken(token, validationParameters, out _);
+    }
+
     public JwtCredential GenerateJwtToken(User user)
     {
         var now = DateTime.UtcNow;

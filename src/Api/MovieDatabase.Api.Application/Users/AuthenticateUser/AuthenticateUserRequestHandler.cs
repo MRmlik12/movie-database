@@ -1,4 +1,5 @@
 ﻿using MovieDatabase.Api.Core.Cqrs;
+using MovieDatabase.Api.Core.Documents.Users;
 using MovieDatabase.Api.Core.Dtos.Users;
 using MovieDatabase.Api.Core.Exceptions.Users;
 using MovieDatabase.Api.Core.Services;
@@ -25,6 +26,15 @@ public sealed class AuthenticateUserRequestHandler(IUserRepository userRepositor
         }
 
         var credentials = jwtService.GenerateJwtToken(user);
+        
+        user.Tokens.Add(new ClaimToken
+        {
+            AccessToken = HashUtils.ComputeHash(credentials.AccessToken.Token),
+            RefreshToken = HashUtils.ComputeHash(credentials.RefreshToken.Token),
+            ExpiresAt = credentials.RefreshToken.ExpireDate,
+            IsRevoked = false
+        });
+        
         var userDto = UserCredentialsDto.From(user);
 
         userDto.Token = credentials.AccessToken.Token;
@@ -32,6 +42,8 @@ public sealed class AuthenticateUserRequestHandler(IUserRepository userRepositor
         
         userDto.RefreshToken = credentials.RefreshToken.Token;
         userDto.RefreshTokenExpireTime = credentials.RefreshToken.ExpireDate;
+        
+        userRepository.Update(user);
         
         return userDto;
     }

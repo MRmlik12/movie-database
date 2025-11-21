@@ -1,27 +1,23 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-
-using HotChocolate.Authorization;
+﻿using HotChocolate.Authorization;
 
 using MovieDatabase.Api.Application.Users.RevokeToken;
 using MovieDatabase.Api.Core.Cqrs;
 using MovieDatabase.Api.Core.Dtos.Users;
+using MovieDatabase.Api.Infrastructure.Db;
 
 namespace MovieDatabase.Api.Mutations;
 
 [ExtendObjectType("Mutation")]
 public class TokenMutations
 {
-    [Authorize]
-    public async Task<RevokeTokenDto> Revoke(ClaimsPrincipal claimsPrincipal, RevokeTokenInput input, [Service] IDispatcher dispatcher)
+    // TODO: Finish implementing token revocation by adding integration tests and verify if it's passing
+    [AllowAnonymous]
+    public async Task<RevokeTokenDto> Revoke(RevokeTokenRequest input, [Service] IUnitOfWork unitOfWork, [Service] IDispatcher dispatcher)
     {
-        var userId = claimsPrincipal.FindFirst(JwtRegisteredClaimNames.Jti);
-        
-        var request = RevokeTokenRequest.From(input);
-        request.UserId = userId?.Value;
-        
-        var result = await dispatcher.Dispatch(request);
+        var result = await dispatcher.Dispatch(input);
 
+        await unitOfWork.Commit();
+        
         return result;
     }
 }
