@@ -1,5 +1,7 @@
 using System.Text.Json.Serialization;
 
+using HotChocolate;
+
 using MovieDatabase.Api.Core.Documents.Blobs;
 
 namespace MovieDatabase.Api.Core.Documents.Films;
@@ -10,6 +12,8 @@ public class Film : BaseDocument
     public const string PartitionKey = "/title";
 
     public string Title { get; set; } = null!;
+    
+    [GraphQLIgnore]
     public string? Thumbnail { get; set; }
     public DateOnly ReleaseDate { get; set; }
     public DirectorInfo Director { get; set; }

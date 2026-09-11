@@ -1,4 +1,4 @@
-﻿using MovieDatabase.Api.Core.Cqrs;
+using MovieDatabase.Api.Core.Cqrs;
 using MovieDatabase.Api.Core.Documents.Films;
 using MovieDatabase.Api.Core.Dtos.Films;
 using MovieDatabase.Api.Core.Exceptions.Films;

@@ -4,6 +4,7 @@ using MovieDatabase.Api.Core.Dtos.Blobs;
 using MovieDatabase.Api.Core.Exceptions.Blobs;
 using MovieDatabase.Api.Core.Services;
 using MovieDatabase.Api.Infrastructure.Db.Repositories;
+using MovieDatabase.SharedKernel.Configurations;
 
 namespace MovieDatabase.Api.Application.Blobs.UploadBlob;
 
@@ -26,8 +27,8 @@ public class UploadBlobRequestHandler(
         }
         
         var stream = request.File.OpenReadStream();
-        var blob = await blobService.UploadBlob(Constants.Blob.ImageContainerName, fileExtension, stream);
-        
+        var blob = await blobService.UploadBlob(BlobStorageConfiguration.ImageContainerName, fileExtension, stream);
+
         await stream.DisposeAsync();
 
         blob.UserId = request.UserId;
