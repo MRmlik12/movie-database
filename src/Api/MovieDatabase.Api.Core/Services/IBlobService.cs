@@ -8,4 +8,6 @@ public interface IBlobService
         CancellationToken cancellationToken = default);
 
     string GetBlobBaseUri();
+
+    string GetContentUrl(string blobId);
 }

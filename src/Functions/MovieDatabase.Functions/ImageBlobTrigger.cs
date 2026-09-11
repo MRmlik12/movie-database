@@ -1,6 +1,8 @@
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
+using MovieDatabase.SharedKernel.Configurations;
+
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 
@@ -9,9 +11,9 @@ namespace MovieDatabase.Functions;
 public static class ImageBlobTrigger
 {
     [Function(nameof(ImageBlobTrigger))]
-    [BlobOutput("thumbnails/{baseName}.jpg")]
+    [BlobOutput(BlobStorageConfiguration.ContentContainerName + "/{baseName}.jpg")]
     public static async Task<byte[]> Run(
-        [BlobTrigger("images/{baseName}.{ext}")] ReadOnlyMemory<byte> blob,
+        [BlobTrigger(BlobStorageConfiguration.ImageContainerName + "/{baseName}.{ext}")] ReadOnlyMemory<byte> blob,
         string baseName,
         string ext,
         FunctionContext context)

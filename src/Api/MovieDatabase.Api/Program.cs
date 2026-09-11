@@ -4,6 +4,7 @@ using MovieDatabase.Api.Core;
 using MovieDatabase.Api.Infrastructure;
 using MovieDatabase.Api.Infrastructure.Db;
 using MovieDatabase.Api.Mutations;
+using MovieDatabase.Api.Types;
 using MovieDatabase.SharedKernel.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -49,6 +50,7 @@ builder.Services
     .AddTypeExtension<UserMutations>()
     .AddTypeExtension<TokenMutations>()
     .AddTypeExtension<BlobMutations>()
+    .AddTypeExtension<FilmTypeExtensions>()
     .AddQueryType<Query>();
 
 

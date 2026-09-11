@@ -9,6 +9,6 @@ public record BlobDto(
     string Url,
     string Hash) : IFrom<BlobDto, Blob>
 {
-    public static BlobDto From(Blob from) 
+    public static BlobDto From(Blob from)
         => new(from.Id.ToString(), from.Name, from.GetFullPath(), from.Hash);
 }
